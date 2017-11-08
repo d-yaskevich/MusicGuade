@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    tools:context="com.example.daria.musicguade.MainActivity">
+
+    <TextView
+        android:id="@+id/address_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="some_address/"
+        android:layout_margin="5dp"/>
+
+    <fragment
+        android:id="@+id/fragment_place"
+        android:name="com.example.daria.musicguade.MyListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/address_view"
+        tools:layout="@android:layout/list_content"/>
+
+</LinearLayout>
