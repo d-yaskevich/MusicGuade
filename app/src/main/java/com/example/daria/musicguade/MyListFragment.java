@@ -66,8 +66,12 @@ public class MyListFragment extends ListFragment {
                     + " files in '" + mFile.getName() + "' folder");
             Collections.sort(folders);
             Collections.sort(files);
+
             for (File currentFolder : folders) {
-                addFolderToItemList(currentFolder);
+                if(currentFolder.list() != null){
+                    addFolderToItemList(currentFolder);
+                }else Log.w(TAG, "'" + currentFolder.getName()
+                        + "' folder is not displayed. There are no files in this folder.");
             }
             for (File currentFile : files) {
                 if (isAudioFile(currentFile)) {
@@ -157,17 +161,13 @@ public class MyListFragment extends ListFragment {
     }
 
     private void addFolderToItemList(File currentFolder) {
-        if (currentFolder.list() != null) {
-            mItems.add(new Item(
-                    currentFolder.getName(),
-                    toObject(currentFolder.list().length),
-                    "",
-                    formatter.format(new Date(currentFolder.lastModified())),
-                    currentFolder.getAbsolutePath()
-            ));
-        } else
-            Log.w(TAG, "'" + currentFolder.getName()
-                    + "' folder is not displayed. There are no files in this folder.");
+        mItems.add(new Item(
+                currentFolder.getName(),
+                toObject(currentFolder.list().length),
+                "",
+                formatter.format(new Date(currentFolder.lastModified())),
+                currentFolder.getAbsolutePath()
+        ));
     }
 
     private void addFileToItemList(File currentFile) {
