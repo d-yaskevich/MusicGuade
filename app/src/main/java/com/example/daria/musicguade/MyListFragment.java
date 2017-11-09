@@ -30,8 +30,8 @@ public class MyListFragment extends ListFragment{
         super.onActivityCreated(savedInstanceState);
         Log.i(TAG,"onActivityCreated()");
         mItems = new ArrayList<>();
-        mItems.add(new Item("Name", "4 objects", "653 bytes", "08.11.2017 16:19 PM", "", true));
-        mItems.add(new Item("Name", "", "53 bytes", "08.11.2017 16:21 PM", "", false));
+        mItems.add(new Item("Name", "4 objects", "653 bytes", "08.11.2017 16:19 PM", ""));
+        mItems.add(new Item("Name", "", "53 bytes", "08.11.2017 16:21 PM", ""));
         MyListAdapter adapter = new MyListAdapter(getActivity(),
                 R.layout.item_fragment, mItems);
         setListAdapter(adapter);

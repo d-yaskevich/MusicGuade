@@ -11,16 +11,16 @@ public class Item {
     private String data;
     private String date;
     private String path;
-    private boolean isFolder;
 
-    public Item(String name, String count, String data, String date, String path, boolean isFolder) {
+    public Item(String name, String count, String data, String date, String path) {
         Log.i(TAG,"constructor, create new object");
         this.name = name;
-        this.count = count;
+        if (count.compareTo("") == 0){
+            this.count = null;
+        }else this.count = count;
         this.data = data;
         this.date = date;
         this.path = path;
-        this.isFolder = isFolder;
     }
 
     public String getName() {
@@ -44,6 +44,8 @@ public class Item {
     }
 
     public boolean isFolder() {
-        return isFolder;
+        if(getCount() == null){
+            return false;
+        }else return true;
     }
 }
