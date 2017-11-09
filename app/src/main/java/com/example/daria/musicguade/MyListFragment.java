@@ -160,23 +160,23 @@ public class MyListFragment extends ListFragment {
         else return "";
     }
 
-    private void addFolderToItemList(File currentFolder) {
+    private void addFolderToItemList(File folder) {
         mItems.add(new Item(
-                currentFolder.getName(),
-                toObject(currentFolder.list().length),
+                folder.getName(),
+                toObject(folder.list().length),
                 "",
-                formatter.format(new Date(currentFolder.lastModified())),
-                currentFolder.getAbsolutePath()
+                formatter.format(new Date(folder.lastModified())),
+                folder.getAbsolutePath()
         ));
     }
 
-    private void addFileToItemList(File currentFile) {
+    private void addFileToItemList(File file) {
         mItems.add(new Item(
-                currentFile.getName(),
+                file.getName(),
                 "",
-                toBytes(currentFile.getTotalSpace()),
-                formatter.format(new Date(currentFile.lastModified())),
-                currentFile.getAbsolutePath()
+                toBytes(file.getTotalSpace()),
+                formatter.format(new Date(file.lastModified())),
+                file.getAbsolutePath()
         ));
     }
 
