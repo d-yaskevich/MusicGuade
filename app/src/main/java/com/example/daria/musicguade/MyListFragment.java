@@ -48,12 +48,19 @@ public class MyListFragment extends ListFragment {
         ArrayList<File> files = new ArrayList<>();
 
         if (mFile.listFiles() != null) {
+            Log.i(TAG, "There are " + mFile.listFiles().length
+                    + " elements in '" + mFile.getName() + "' folder");
             for (File curFile : mFile.listFiles()) {
                 if (curFile.isDirectory()) {
                     folders.add(curFile);
-                } else files.add(curFile);
+                } else {
+                    files.add(curFile);
+                }
 
             }
+            Log.i(TAG, "There are " + folders.size()
+                    + " folder and " + files.size()
+                    + " files in '" + mFile.getName() + "' folder");
             Collections.sort(folders);
             Collections.sort(files);
             for (File currentFolder : folders) {
@@ -127,18 +134,17 @@ public class MyListFragment extends ListFragment {
     }
 
     private void addFolderToItemList(File currentFolder) {
-        String count;
         if (currentFolder.list() != null) {
-            count = toObject(currentFolder.list().length);
-        } else count = toObject(0);
-
-        mItems.add(new Item(
-                currentFolder.getName(),
-                count,
-                "",
-                formatter.format(new Date(currentFolder.lastModified())),
-                currentFolder.getAbsolutePath()
-        ));
+            mItems.add(new Item(
+                    currentFolder.getName(),
+                    toObject(currentFolder.list().length),
+                    "",
+                    formatter.format(new Date(currentFolder.lastModified())),
+                    currentFolder.getAbsolutePath()
+            ));
+        } else
+            Log.w(TAG, "'" + currentFolder.getName()
+                    + "' folder is not displayed. There are no files in this folder.");
     }
 
     private void addFileToItemList(File currentFile) {
