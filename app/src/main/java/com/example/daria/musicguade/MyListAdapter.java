@@ -3,6 +3,7 @@ package com.example.daria.musicguade;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +15,15 @@ import java.util.ArrayList;
 
 public class MyListAdapter extends ArrayAdapter{
 
+    private final String TAG = "MyListAdapter (: ";
+
     Context context;
     ArrayList<Item> array;
     int textViewResourceId;
 
     public MyListAdapter(Context context, int textViewResourceId, ArrayList<Item> array){
         super(context, android.R.layout.simple_list_item_1);
+        Log.i(TAG,"constructor, create new object");
         this.context = context;
         this.array = array;
         this.textViewResourceId = textViewResourceId;

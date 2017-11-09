@@ -1,6 +1,10 @@
 package com.example.daria.musicguade;
 
+import android.util.Log;
+
 public class Item {
+
+    private final String TAG = "Item (: ";
 
     private String name;
     private String count;
@@ -10,6 +14,7 @@ public class Item {
     private boolean isFolder;
 
     public Item(String name, String count, String data, String date, String path, boolean isFolder) {
+        Log.i(TAG,"constructor, create new object");
         this.name = name;
         this.count = count;
         this.data = data;
