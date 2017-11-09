@@ -25,6 +25,9 @@ public class MyListFragment extends ListFragment {
 
     private ArrayList<Item> mItems;
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+    private final String[] audioFileExtension = {"wv", "wvc", "ape", "mpc", "mpp", "mp+",
+            "mp4", "m4a", "m4b", "aac", "mp4", "m4a", "m4b", "lac", "spx", "wav", "oga", "ogg",
+            "opus", "wav", "aiff", "mp3", "mp2", "mp1", "ogg", "xm", "it", "s3m", "mod", "mtm", "umx"};
 
     @Override
     public void onAttach(Context context) {
@@ -67,7 +70,10 @@ public class MyListFragment extends ListFragment {
                 addFolderToItemList(currentFolder);
             }
             for (File currentFile : files) {
-                addFileToItemList(currentFile);
+                if (isAudioFile(currentFile)) {
+                    addFileToItemList(currentFile);
+                } else Log.w(TAG, "'" + currentFile.getName()
+                        + "' file is not displayed. This isn't an audio file");
             }
         } else Log.w(TAG, "list files is empty");
     }
@@ -131,6 +137,23 @@ public class MyListFragment extends ListFragment {
 
     public ArrayList<Item> getItems() {
         return mItems;
+    }
+
+    private boolean isAudioFile(File file) {
+        String fileExtension = getFileExtension(file);
+        for (String extension : audioFileExtension) {
+            if (extension.compareToIgnoreCase(fileExtension) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String getFileExtension(File file) {
+        String fileName = file.getName();
+        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
+        else return "";
     }
 
     private void addFolderToItemList(File currentFolder) {
