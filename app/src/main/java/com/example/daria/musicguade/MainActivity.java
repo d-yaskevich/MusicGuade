@@ -1,6 +1,7 @@
 package com.example.daria.musicguade;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
@@ -8,7 +9,6 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
 
     private TextView address;
-
     private final String TAG = "MainActivity (: ";
 
     @Override
@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG,"onCreate()");
         setContentView(R.layout.activity_main);
         address = (TextView) findViewById(R.id.address_view);
-
+        address.setText(Environment.getRootDirectory().getAbsolutePath());
     }
 
     @Override
