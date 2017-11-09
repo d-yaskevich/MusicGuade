@@ -17,7 +17,7 @@ public class MyListFragment extends ListFragment{
 
     private final String TAG = "MyListFragment (: ";
 
-    ArrayList<Item> mItems;
+    private ArrayList<Item> mItems;
 
     @Override
     public void onAttach(Context context) {
@@ -92,5 +92,9 @@ public class MyListFragment extends ListFragment{
     public void onDetach() {
         Log.i(TAG,"onDetach()");
         super.onDetach();
+    }
+
+    public ArrayList<Item> getItems() {
+        return mItems;
     }
 }
