@@ -7,7 +7,8 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView address;
+    private TextView address;
+
     private final String TAG = "MainActivity (: ";
 
     @Override
@@ -16,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG,"onCreate()");
         setContentView(R.layout.activity_main);
         address = (TextView) findViewById(R.id.address_view);
+
     }
 
     @Override
