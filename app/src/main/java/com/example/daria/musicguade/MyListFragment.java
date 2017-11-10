@@ -49,7 +49,7 @@ public class MyListFragment extends ListFragment {
         ArrayList<File> files = new ArrayList<>();
 
         if (mFile.listFiles() != null) {
-            MusicFilter filter = new MusicFilter();
+            MusicFilter filter = new MusicFilter(mFile.getName());
             File[] listAudioFiles = mFile.listFiles(filter);
             if (listAudioFiles != null) {
                 Log.i(TAG, "There are " + mFile.listFiles().length
@@ -57,7 +57,6 @@ public class MyListFragment extends ListFragment {
                         + " audio elements in '" + mFile.getName() + "' folder");
                 for (File currentFile : listAudioFiles) {
                     if (currentFile.isDirectory()) {
-
                         folders.add(currentFile);
                     } else {
                         files.add(currentFile);
@@ -71,7 +70,8 @@ public class MyListFragment extends ListFragment {
                 Collections.sort(files);
 
                 for (File currentFolder : folders) {
-                    File[] listAudioSubFolder = currentFolder.listFiles(filter);
+                    MusicFilter nFilter = new MusicFilter(currentFolder.getAbsolutePath().replace(testPath,""));
+                    File[] listAudioSubFolder = currentFolder.listFiles(nFilter);
                     if(listAudioSubFolder != null
                             && listAudioSubFolder.length != 0){
                         addFolderToItemList(currentFolder);
@@ -160,7 +160,9 @@ public class MyListFragment extends ListFragment {
     private void addFolderToItemList(File folder) {
         mItems.add(new Item(
                 folder.getName(),
-                toObject(folder.listFiles(new MusicFilter()).length),
+                toObject(folder
+                        .listFiles(new MusicFilter(folder.getAbsolutePath().replace(testPath,"")))
+                        .length),
                 "",
                 formatter.format(new Date(folder.lastModified())),
                 folder.getAbsolutePath()
