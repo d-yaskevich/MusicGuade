@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG,"onCreate()");
         setContentView(R.layout.activity_main);
         address = (TextView) findViewById(R.id.address_view);
-        address.setText(Environment.getRootDirectory().getAbsolutePath());
+        address.setText(Environment.getExternalStorageDirectory().getAbsolutePath());
     }
 
     @Override

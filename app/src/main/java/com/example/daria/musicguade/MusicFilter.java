@@ -18,33 +18,29 @@ public class MusicFilter implements FileFilter {
             "opus", "wav", "aiff", "mp3", "mp2", "mp1", "ogg", "xm", "it", "s3m", "mod", "mtm", "umx"};
 
     @Override
-    public boolean accept(File folder) {
-        if (isAudioFolder(folder)) {
-            return true;
-        } else Log.w(TAG, "'" + folder.getName()
-                + "' folder is not displayed. There are no audio files in this folder.");
-        return false;
-    }
-
-    /**
-     * Checks if there are audio files in the folder.
-     * Does not scan subfolders.
-     * @param folder is checked folder.
-     * @return true if there are audio files in this folder, otherwise false.
-     */
-    public static boolean isAudioFolder(File folder) {
-        for (File currentFile : folder.listFiles()) {
-            if (!currentFile.isDirectory()) {
-                if (isAudioFile(currentFile)) {
-                    return true;
+    public boolean accept(File pathname) {
+        if (pathname.isDirectory()) {
+            File[] listAudioFiles = pathname.listFiles(new MusicFilter());
+            if (listAudioFiles != null) {
+                if (listAudioFiles.length == 1
+                        && listAudioFiles[0].isDirectory()) {
+                    Log.d(TAG, "'" + listAudioFiles[0].getAbsolutePath() + "' one audio folder");
                 }
-            }
+                return true;
+            } else Log.w(TAG, "'" + pathname.getAbsolutePath()
+                    + "' folder is not displayed. There are no audio files in this folder.");
+        } else {
+            if (isAudioFile(pathname)) {
+                return true;
+            } else Log.w(TAG, "'" + pathname.getAbsolutePath()
+                    + "' file is not displayed. This isn't an audio file");
         }
         return false;
     }
 
     /**
      * Check if the file is an audio file by file extension.
+     *
      * @param file is checked file
      * @return true if the file is an audio file, otherwise false.
      */
@@ -60,6 +56,7 @@ public class MusicFilter implements FileFilter {
 
     /**
      * Get the file extension.
+     *
      * @param file
      * @return file extension.
      */

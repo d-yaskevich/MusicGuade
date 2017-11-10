@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
-import static com.example.daria.musicguade.MusicFilter.isAudioFile;
-
 public class MyListFragment extends ListFragment {
 
     private final String TAG = "MyListFragment (: ";
@@ -39,7 +37,7 @@ public class MyListFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         Log.i(TAG, "onActivityCreated()");
         mItems = new ArrayList<>();
-        fillItemList(Environment.getRootDirectory());
+        fillItemList(Environment.getExternalStorageDirectory());
         MyListAdapter adapter = new MyListAdapter(getActivity(),
                 R.layout.item_fragment, mItems);
         setListAdapter(adapter);
@@ -50,37 +48,37 @@ public class MyListFragment extends ListFragment {
         ArrayList<File> files = new ArrayList<>();
 
         if (mFile.listFiles() != null) {
-            Log.i(TAG, "There are " + mFile.listFiles().length
-                    + " elements in '" + mFile.getName() + "' folder");
-            for (File curFile : mFile.listFiles()) {
-                if (curFile.isDirectory()) {
-                    folders.add(curFile);
-                } else {
-                    files.add(curFile);
+            File[] listAudioFiles = mFile.listFiles(new MusicFilter());
+            if (listAudioFiles != null) {
+                Log.i(TAG, "There are " + mFile.listFiles().length
+                        + " elements and " + listAudioFiles.length
+                        + " audio elements in '" + mFile.getName() + "' folder");
+                for (File currentFile : listAudioFiles) {
+                    if (currentFile.isDirectory()) {
+                        if(currentFile.list() != null){
+                            folders.add(currentFile);
+                        }
+                    } else {
+                        files.add(currentFile);
+                    }
                 }
+                Log.i(TAG, "There are " + folders.size()
+                        + " audio folder and " + files.size()
+                        + " audio files in '" + mFile.getName() + "' folder");
 
-            }
-            Log.i(TAG, "There are " + folders.size()
-                    + " folder and " + files.size()
-                    + " files in '" + mFile.getName() + "' folder");
+                Collections.sort(folders);
+                Collections.sort(files);
 
-            Collections.sort(folders);
-            Collections.sort(files);
-
-            for (File currentFolder : folders) {
-                if (currentFolder.listFiles(new MusicFilter()) != null) {
+                for (File currentFolder : folders) {
                     addFolderToItemList(currentFolder);
-                } else Log.w(TAG, "'" + currentFolder.getName()
-                        + "' folder is not displayed. There are no files in this folder.");
-            }
-            for (File currentFile : files) {
-                if (isAudioFile(currentFile)) {
+                }
+                for (File currentFile : files) {
                     addFileToItemList(currentFile);
-                } else Log.w(TAG, "'" + currentFile.getName()
-                        + "' file is not displayed. This isn't an audio file");
-            }
+                }
+            } else Log.w(TAG, "There are no audio files in '"
+                    + mFile.getName() + "' folder.");
         } else Log.w(TAG, "'" + mFile.getName()
-                + "'current folder is empty");
+                + "' folder is empty");
     }
 
     @Override
@@ -157,7 +155,7 @@ public class MyListFragment extends ListFragment {
     private void addFolderToItemList(File folder) {
         mItems.add(new Item(
                 folder.getName(),
-                toObject(folder.list().length),
+                String.valueOf(folder.list().length),
                 "",
                 formatter.format(new Date(folder.lastModified())),
                 folder.getAbsolutePath()
