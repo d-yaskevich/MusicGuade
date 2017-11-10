@@ -5,35 +5,39 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileFilter;
 
-import static android.content.ContentValues.TAG;
-
 /**
  * Created by yakov on 10.11.2017.
  */
 
 public class MusicFilter implements FileFilter {
 
+    private final String TAG = "MusicFilter (: ";
+
     private static final String[] audioFileExtension = {"wv", "wvc", "ape", "mpc", "mpp", "mp+",
             "mp4", "m4a", "m4b", "aac", "mp4", "m4a", "m4b", "lac", "spx", "wav", "oga", "ogg",
             "opus", "wav", "aiff", "mp3", "mp2", "mp1", "ogg", "xm", "it", "s3m", "mod", "mtm", "umx"};
 
+    public MusicFilter() {
+    }
+
     @Override
     public boolean accept(File pathname) {
         if (pathname.isDirectory()) {
-            File[] listAudioFiles = pathname.listFiles(new MusicFilter());
-            if (listAudioFiles != null) {
+            MusicFilter filter = new MusicFilter();
+            File[] listAudioFiles = pathname.listFiles(filter);
+            if (listAudioFiles != null && listAudioFiles.length != 0) {
                 if (listAudioFiles.length == 1
                         && listAudioFiles[0].isDirectory()) {
-                    Log.d(TAG, "'" + listAudioFiles[0].getAbsolutePath() + "' one audio folder");
+                    Log.d(TAG, "'" + listAudioFiles[0].getAbsolutePath().replace("/mnt/sdcard","") + "' one audio folder");
                 }
                 return true;
-            } else Log.w(TAG, "'" + pathname.getAbsolutePath()
+            } else Log.w(TAG, "'" + pathname.getAbsolutePath().replace("/mnt/sdcard","")
                     + "' folder is not displayed. There are no audio files in this folder.");
         } else {
             if (isAudioFile(pathname)) {
                 return true;
-            } else Log.w(TAG, "'" + pathname.getAbsolutePath()
-                    + "' file is not displayed. This isn't an audio file");
+            } /*else Log.w(TAG, "'" + pathname.getName()
+                    + "' file is not displayed. This isn't an audio file");*/
         }
         return false;
     }

@@ -3,7 +3,6 @@ package com.example.daria.musicguade;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -16,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 1;
     private TextView address;
     private final String TAG = "MainActivity (: ";
+    public static final String testPath = "/mnt/sdcard/WhatsApp";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED) {
-            address.setText(Environment.getExternalStorageDirectory().getAbsolutePath());
+            address.setText(testPath);
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                address.setText(Environment.getExternalStorageDirectory().getAbsolutePath());
+                address.setText(testPath);
             } else {
                 Log.w(TAG,"Permission denied!");
             }

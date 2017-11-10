@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
+import static com.example.daria.musicguade.MainActivity.testPath;
+
 public class MyListFragment extends ListFragment {
 
     private final String TAG = "MyListFragment (: ";
@@ -36,7 +38,7 @@ public class MyListFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         Log.i(TAG, "onActivityCreated()");
         mItems = new ArrayList<>();
-        fillItemList(new File("/mnt"));
+        fillItemList(new File(testPath));
         MyListAdapter adapter = new MyListAdapter(getActivity(),
                 R.layout.item_fragment, mItems);
         setListAdapter(adapter);
@@ -47,16 +49,16 @@ public class MyListFragment extends ListFragment {
         ArrayList<File> files = new ArrayList<>();
 
         if (mFile.listFiles() != null) {
-            File[] listAudioFiles = mFile.listFiles(new MusicFilter());
+            MusicFilter filter = new MusicFilter();
+            File[] listAudioFiles = mFile.listFiles(filter);
             if (listAudioFiles != null) {
                 Log.i(TAG, "There are " + mFile.listFiles().length
                         + " elements and " + listAudioFiles.length
                         + " audio elements in '" + mFile.getName() + "' folder");
                 for (File currentFile : listAudioFiles) {
                     if (currentFile.isDirectory()) {
-                        if(currentFile.listFiles(new MusicFilter()) != null){
-                            folders.add(currentFile);
-                        }
+
+                        folders.add(currentFile);
                     } else {
                         files.add(currentFile);
                     }
@@ -69,7 +71,11 @@ public class MyListFragment extends ListFragment {
                 Collections.sort(files);
 
                 for (File currentFolder : folders) {
-                    addFolderToItemList(currentFolder);
+                    File[] listAudioSubFolder = currentFolder.listFiles(filter);
+                    if(listAudioSubFolder != null
+                            && listAudioSubFolder.length != 0){
+                        addFolderToItemList(currentFolder);
+                    }
                 }
                 for (File currentFile : files) {
                     addFileToItemList(currentFile);
