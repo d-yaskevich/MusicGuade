@@ -19,15 +19,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
+import static com.example.daria.musicguade.MusicFilter.isAudioFile;
+
 public class MyListFragment extends ListFragment {
 
     private final String TAG = "MyListFragment (: ";
 
     private ArrayList<Item> mItems;
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-    private final String[] audioFileExtension = {"wv", "wvc", "ape", "mpc", "mpp", "mp+",
-            "mp4", "m4a", "m4b", "aac", "mp4", "m4a", "m4b", "lac", "spx", "wav", "oga", "ogg",
-            "opus", "wav", "aiff", "mp3", "mp2", "mp1", "ogg", "xm", "it", "s3m", "mod", "mtm", "umx"};
 
     @Override
     public void onAttach(Context context) {
@@ -69,11 +68,8 @@ public class MyListFragment extends ListFragment {
             Collections.sort(files);
 
             for (File currentFolder : folders) {
-                if (currentFolder.list() != null) {
-                    if (isAudioFolder(currentFolder)) {
-                        addFolderToItemList(currentFolder);
-                    } else Log.w(TAG, "'" + currentFolder.getName()
-                            + "' folder is not displayed. There are no audio files in this folder.");
+                if (currentFolder.listFiles(new MusicFilter()) != null) {
+                    addFolderToItemList(currentFolder);
                 } else Log.w(TAG, "'" + currentFolder.getName()
                         + "' folder is not displayed. There are no files in this folder.");
             }
@@ -148,33 +144,14 @@ public class MyListFragment extends ListFragment {
         return mItems;
     }
 
-    private boolean isAudioFolder(File folder) {
-        //check inner folder
-        for (File currentFile : folder.listFiles()) {
-            if (!currentFile.isDirectory()) {
-                if (isAudioFile(currentFile)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean isAudioFile(File file) {
-        String fileExtension = getFileExtension(file);
-        for (String currentExtension : audioFileExtension) {
-            if (currentExtension.compareToIgnoreCase(fileExtension) == 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static String getFileExtension(File file) {
-        String fileName = file.getName();
-        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
-            return fileName.substring(fileName.lastIndexOf(".") + 1);
-        else return "";
+    private void addFileToItemList(File file) {
+        mItems.add(new Item(
+                file.getName(),
+                "",
+                toBytes(file.getTotalSpace()),
+                formatter.format(new Date(file.lastModified())),
+                file.getAbsolutePath()
+        ));
     }
 
     private void addFolderToItemList(File folder) {
@@ -184,16 +161,6 @@ public class MyListFragment extends ListFragment {
                 "",
                 formatter.format(new Date(folder.lastModified())),
                 folder.getAbsolutePath()
-        ));
-    }
-
-    private void addFileToItemList(File file) {
-        mItems.add(new Item(
-                file.getName(),
-                "",
-                toBytes(file.getTotalSpace()),
-                formatter.format(new Date(file.lastModified())),
-                file.getAbsolutePath()
         ));
     }
 
