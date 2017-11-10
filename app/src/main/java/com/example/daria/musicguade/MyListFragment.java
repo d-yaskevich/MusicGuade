@@ -3,7 +3,6 @@ package com.example.daria.musicguade;
 import android.app.ListFragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,7 +36,7 @@ public class MyListFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         Log.i(TAG, "onActivityCreated()");
         mItems = new ArrayList<>();
-        fillItemList(Environment.getExternalStorageDirectory());
+        fillItemList(new File("/mnt"));
         MyListAdapter adapter = new MyListAdapter(getActivity(),
                 R.layout.item_fragment, mItems);
         setListAdapter(adapter);
@@ -55,7 +54,7 @@ public class MyListFragment extends ListFragment {
                         + " audio elements in '" + mFile.getName() + "' folder");
                 for (File currentFile : listAudioFiles) {
                     if (currentFile.isDirectory()) {
-                        if(currentFile.list() != null){
+                        if(currentFile.listFiles(new MusicFilter()) != null){
                             folders.add(currentFile);
                         }
                     } else {
@@ -155,7 +154,7 @@ public class MyListFragment extends ListFragment {
     private void addFolderToItemList(File folder) {
         mItems.add(new Item(
                 folder.getName(),
-                String.valueOf(folder.list().length),
+                toObject(folder.listFiles(new MusicFilter()).length),
                 "",
                 formatter.format(new Date(folder.lastModified())),
                 folder.getAbsolutePath()
