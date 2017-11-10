@@ -64,8 +64,10 @@ public class MyListFragment extends ListFragment {
             Log.i(TAG, "There are " + folders.size()
                     + " folder and " + files.size()
                     + " files in '" + mFile.getName() + "' folder");
+
             Collections.sort(folders);
             Collections.sort(files);
+
             for (File currentFolder : folders) {
                 if(currentFolder.list() != null){
                     if(isAudioFolder(currentFolder)){
@@ -152,8 +154,8 @@ public class MyListFragment extends ListFragment {
 
     private boolean isAudioFile(File file) {
         String fileExtension = getFileExtension(file);
-        for (String extension : audioFileExtension) {
-            if (extension.compareToIgnoreCase(fileExtension) == 0) {
+        for (String currentExtension : audioFileExtension) {
+            if (currentExtension.compareToIgnoreCase(fileExtension) == 0) {
                 return true;
             }
         }
