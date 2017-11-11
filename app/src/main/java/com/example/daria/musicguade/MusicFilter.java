@@ -4,8 +4,8 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.ArrayList;
 
-import static android.util.Log.d;
 import static com.example.daria.musicguade.MainActivity.testPath;
 
 /**
@@ -20,23 +20,36 @@ public class MusicFilter implements FileFilter {
             "mp4", "m4a", "m4b", "aac", "mp4", "m4a", "m4b", "lac", "spx", "wav", "oga", "ogg",
             "opus", "wav", "aiff", "mp3", "mp2", "mp1", "ogg", "xm", "it", "s3m", "mod", "mtm", "umx"};
 
+    private ArrayList<File> onceFolders;
+    private ArrayList<Integer> countSubFiles;
 
-    public MusicFilter(String filePath) {
-        d(TAG, "constructor for "+filePath);
+    public MusicFilter() {
+        onceFolders = new ArrayList<>();
+        countSubFiles = new ArrayList<>();
     }
 
     @Override
     public boolean accept(File pathname) {
         if (pathname.isDirectory()) {
-            MusicFilter filter = new MusicFilter(pathname.getAbsolutePath().replace(testPath,""));
+            MusicFilter filter = new MusicFilter();
             File[] listAudioFiles = pathname.listFiles(filter);
             if (listAudioFiles != null && listAudioFiles.length != 0) {
                 if (listAudioFiles.length == 1
                         && listAudioFiles[0].isDirectory()) {
-                    d(TAG, "'" + listAudioFiles[0].getAbsolutePath().replace(testPath, "") + "' once folder!");
-                }else Log.d(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "") + "' folder correct!");
+                    Log.d(TAG, "'" + listAudioFiles[0].getAbsolutePath().replace(testPath, "") + "' once folder!");
+                    if (filter.getOnceFolders().size() == 1) {
+                        onceFolders.add(filter.getOnceFolders().get(0));//use when add name once subfolder this subfolder
+                    } else {
+                        onceFolders.add(listAudioFiles[0]);//use when add name subfolder
+                    }
+                    countSubFiles.add(filter.getCountSubFiles().get(0));
+                } else {
+                    countSubFiles.add(listAudioFiles.length);
+                    Log.d(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "")
+                            + "' folder correct! There are " + listAudioFiles.length + " objects.");
+                }
                 return true;
-            } /*else Log.w(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "")
+            }/*else Log.w(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "")
                     + "' folder is not displayed. There are no audio files in this folder.");*/
         } else {
             if (isAudioFile(pathname)) {
@@ -74,5 +87,13 @@ public class MusicFilter implements FileFilter {
         if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
             return fileName.substring(fileName.lastIndexOf(".") + 1);
         else return "";
+    }
+
+    public ArrayList<File> getOnceFolders() {
+        return onceFolders;
+    }
+
+    public ArrayList<Integer> getCountSubFiles() {
+        return countSubFiles;
     }
 }
