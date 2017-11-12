@@ -66,8 +66,9 @@ public class MyListFragment extends ListFragment {
                 Log.i(TAG, "There are " + folders.size()
                         + " audio folder and " + files.size()
                         + " audio files in '" + mFile.getName() + "' folder");
-
-                replaceOnceFolders(folders, filter.getOnceFolders());
+                if (filter.getOnceFolders().size() != 0) {
+                    replaceOnceFolders(folders, filter.getOnceFolders());
+                }
                 //Collections.sort(folders);
                 Collections.sort(files);
 
@@ -82,18 +83,6 @@ public class MyListFragment extends ListFragment {
                     + mFile.getName() + "' folder.");
         } else Log.w(TAG, "'" + mFile.getName()
                 + "' folder is empty");
-    }
-
-    private void replaceOnceFolders(ArrayList<File> folders, ArrayList<File> onceFolders) {
-        for(File currentFolder : folders){
-            for(File currentSubFolder : onceFolders){
-                if(currentSubFolder.getAbsolutePath().contains(currentFolder.getName())){
-                    folders.set(folders.indexOf(currentFolder),currentSubFolder);
-                    onceFolders.remove(currentSubFolder);
-                    break;
-                }
-            }
-        }
     }
 
     @Override
@@ -155,6 +144,18 @@ public class MyListFragment extends ListFragment {
 
     public ArrayList<Item> getItems() {
         return mItems;
+    }
+
+    private void replaceOnceFolders(ArrayList<File> folders, ArrayList<File> onceFolders) {
+        for (File currentFolder : folders) {
+            for (File currentSubFolder : onceFolders) {
+                if (currentSubFolder.getAbsolutePath().contains(currentFolder.getName())) {
+                    folders.set(folders.indexOf(currentFolder), currentSubFolder);
+                    onceFolders.remove(currentSubFolder);
+                    break;
+                }
+            }
+        }
     }
 
     private void addFileToItemList(File file) {
