@@ -16,13 +16,11 @@
         android:layout_marginRight="15dp"
         android:layout_marginTop="10dp"/>
 
-    <fragment
+    <FrameLayout
         android:id="@+id/fragment_place"
-        android:name="com.example.daria.musicguade.MyListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/address_view"
-        android:layout_margin="10dp"
-        tools:layout="@android:layout/list_content"/>
+        android:layout_margin="10dp"/>
 
 </LinearLayout>

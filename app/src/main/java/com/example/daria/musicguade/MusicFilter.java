@@ -1,7 +1,5 @@
 package com.example.daria.musicguade;
 
-import android.util.Log;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
@@ -9,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static com.example.daria.musicguade.MainActivity.testPath;
+
 
 /**
  * Created by yakov on 10.11.2017.
@@ -37,8 +35,8 @@ public class MusicFilter implements FileFilter {
             String[] list = pathname.list(new MusicFileFilter());
             if (list != null && list.length != 0) {
                 mSubFolders.put(pathname, list.length);
-                Log.d(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "") + "' folder contain "
-                        + list.length + " audio files.");
+                /*Log.d(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "") + "' folder contain "
+                        + list.length + " audio files.");*/
                 return true;
             } else {
                 MusicFilter filter = new MusicFilter();
@@ -46,12 +44,12 @@ public class MusicFilter implements FileFilter {
                 if (listAudioFiles != null && listAudioFiles.length != 0) {
                     if (listAudioFiles.length == 1
                             && listAudioFiles[0].isDirectory()) {
-                        Log.d(TAG, "'" + listAudioFiles[0].getAbsolutePath().replace(testPath, "") + "' once folder!");
+                        //Log.d(TAG, "'" + listAudioFiles[0].getAbsolutePath().replace(testPath, "") + "' once folder!");
                         mSubFolders.putAll(filter.getSubFolders());
                     } else {
                         mSubFolders.put(pathname, listAudioFiles.length);
-                        Log.d(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "")
-                                + "' folder correct! There are " + listAudioFiles.length + " objects.");
+                        /*Log.d(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "")
+                                + "' folder correct! There are " + listAudioFiles.length + " objects.");*/
                     }
                     return true;
                 }/*else Log.w(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "")

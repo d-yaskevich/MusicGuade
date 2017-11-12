@@ -1,6 +1,7 @@
 package com.example.daria.musicguade;
 
 import android.Manifest;
+import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,7 +16,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 1;
     private TextView address;
     private final String TAG = "MainActivity (: ";
-    public static final String testPath = "/mnt/sdcard/";
+    private final String testPath = "/mnt/sdcard/";
+
+    private MyListFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +36,13 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     PERMISSION_REQUEST_CODE);
         }
+
+        fragment = new MyListFragment();
+        fragment.setPath(testPath);
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.add(R.id.fragment_place, fragment);
+        ft.addToBackStack(null);
+        ft.commit();
     }
 
     @Override
@@ -41,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 address.setText(testPath);
             } else {
-                Log.w(TAG,"Permission denied!");
+                Log.w(TAG, "Permission denied!");
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

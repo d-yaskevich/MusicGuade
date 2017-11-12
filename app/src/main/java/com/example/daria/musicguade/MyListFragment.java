@@ -20,14 +20,19 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import static com.example.daria.musicguade.MainActivity.testPath;
-
 public class MyListFragment extends ListFragment {
 
     private final String TAG = "MyListFragment (: ";
 
-    private ArrayList<Item> mItems;
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+    private final String DEFAULT_PATH = "/mnt/";
+
+    private ArrayList<Item> mItems;
+    private String path;
+
+    public MyListFragment() {
+        this.path = DEFAULT_PATH;
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -39,15 +44,15 @@ public class MyListFragment extends ListFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Log.i(TAG, "onActivityCreated()");
+        setRetainInstance(true);
         mItems = new ArrayList<>();
-        fillItemList(new File(testPath));
+        fillItemList(new File(path));
         MyListAdapter adapter = new MyListAdapter(getActivity(),
                 R.layout.item_fragment, mItems);
         setListAdapter(adapter);
     }
 
     private void fillItemList(File mFile) {
-
         if (mFile.listFiles() != null) {
             MusicFilter filter = new MusicFilter();
             File[] listAudioFiles = mFile.listFiles(filter);
@@ -100,7 +105,7 @@ public class MyListFragment extends ListFragment {
         super.onListItemClick(l, v, position, id);
 
         Toast.makeText(getActivity(),
-                "PUSH "+getListView().getItemAtPosition(position).toString(),
+                "PUSH " + getListView().getItemAtPosition(position).toString(),
                 Toast.LENGTH_LONG).show();
     }
 
@@ -136,7 +141,7 @@ public class MyListFragment extends ListFragment {
 
     private void addFileToItemList(File file) {
         mItems.add(new Item(
-                file.getAbsolutePath().replace(testPath, ""),
+                file.getAbsolutePath().replace(path, ""),
                 "",
                 toBytes(file.getTotalSpace()),
                 formatter.format(new Date(file.lastModified())),
@@ -146,7 +151,7 @@ public class MyListFragment extends ListFragment {
 
     private void addFolderToItemList(File folder, int count) {
         mItems.add(new Item(
-                folder.getAbsolutePath().replace(testPath, ""),
+                folder.getAbsolutePath().replace(path, ""),
                 toObject(count),
                 "",
                 formatter.format(new Date(folder.lastModified())),
@@ -178,5 +183,9 @@ public class MyListFragment extends ListFragment {
             space += " B";
         }
         return space;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }
