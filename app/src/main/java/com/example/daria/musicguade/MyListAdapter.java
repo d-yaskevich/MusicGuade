@@ -65,8 +65,4 @@ public class MyListAdapter extends ArrayAdapter{
         }
         return item;
     }
-
-    public ArrayList<Item> getItems() {
-        return mItems;
-    }
 }
