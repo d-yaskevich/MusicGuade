@@ -48,4 +48,9 @@ public class Item {
             return false;
         }else return true;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 1;
     private TextView address;
     private final String TAG = "MainActivity (: ";
-    public static final String testPath = "/mnt/";
+    public static final String testPath = "/mnt/sdcard/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -17,6 +17,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 
 import static com.example.daria.musicguade.MainActivity.testPath;
 
@@ -45,8 +47,6 @@ public class MyListFragment extends ListFragment {
     }
 
     private void fillItemList(File mFile) {
-        ArrayList<File> folders = new ArrayList<>();
-        ArrayList<File> files = new ArrayList<>();
 
         if (mFile.listFiles() != null) {
             MusicFilter filter = new MusicFilter();
@@ -55,30 +55,22 @@ public class MyListFragment extends ListFragment {
                 Log.i(TAG, "There are " + mFile.listFiles().length
                         + " elements and " + listAudioFiles.length
                         + " audio elements in '" + mFile.getName() + "' folder");
-                Log.d(TAG, "There are " + filter.getOnceFolders().toString().replace(testPath, "") + " once folders");
-                for (File currentFile : listAudioFiles) {
-                    if (currentFile.isDirectory()) {
-                        folders.add(currentFile);
-                    } else {
-                        files.add(currentFile);
-                    }
-                }
-                Log.i(TAG, "There are " + folders.size()
-                        + " audio folder and " + files.size()
-                        + " audio files in '" + mFile.getName() + "' folder");
-                if (filter.getOnceFolders().size() != 0) {
-                    replaceOnceFolders(folders, filter.getOnceFolders());
-                }
-                //Collections.sort(folders);
-                Collections.sort(files);
 
-                for (File currentFolder : folders) {
-                    addFolderToItemList(currentFolder,
-                            filter.getCountSubFiles().get(folders.indexOf(currentFolder)));
+                Set<Map.Entry<File, Integer>> foldersNameSet = filter.getSubFolders().entrySet();
+                for (Map.Entry<File, Integer> currentFoldersName : foldersNameSet) {
+                    addFolderToItemList(currentFoldersName.getKey(),
+                            currentFoldersName.getValue());
                 }
-                for (File currentFile : files) {
-                    addFileToItemList(currentFile);
+
+                ArrayList<File> filesName = filter.getSubFiles();
+                Collections.sort(filesName);
+                for (File currentFileName : filesName) {
+                    addFileToItemList(currentFileName);
                 }
+                Log.i(TAG, "There are " + foldersNameSet.size()
+                        + " audio folder and " + filesName.size()
+                        + " audio files in '" + mFile.getName() + "' folder");
+
             } else Log.w(TAG, "There are no audio files in '"
                     + mFile.getName() + "' folder.");
         } else Log.w(TAG, "'" + mFile.getName()
@@ -108,7 +100,7 @@ public class MyListFragment extends ListFragment {
         super.onListItemClick(l, v, position, id);
 
         Toast.makeText(getActivity(),
-                getListView().getItemAtPosition(position).toString(),
+                "PUSH "+getListView().getItemAtPosition(position).toString(),
                 Toast.LENGTH_LONG).show();
     }
 
@@ -140,22 +132,6 @@ public class MyListFragment extends ListFragment {
     public void onDetach() {
         Log.i(TAG, "onDetach()");
         super.onDetach();
-    }
-
-    public ArrayList<Item> getItems() {
-        return mItems;
-    }
-
-    private void replaceOnceFolders(ArrayList<File> folders, ArrayList<File> onceFolders) {
-        for (File currentFolder : folders) {
-            for (File currentSubFolder : onceFolders) {
-                if (currentSubFolder.getAbsolutePath().contains(currentFolder.getName())) {
-                    folders.set(folders.indexOf(currentFolder), currentSubFolder);
-                    onceFolders.remove(currentSubFolder);
-                    break;
-                }
-            }
-        }
     }
 
     private void addFileToItemList(File file) {
