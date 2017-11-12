@@ -19,14 +19,14 @@ public class MyListAdapter extends ArrayAdapter{
 
     private Context context;
     private ArrayList<Item> mItems;
-    private int textViewResId;
+    private int itemViewResId;
 
-    public MyListAdapter(Context context, int textViewResId, ArrayList<Item> mItems){
+    public MyListAdapter(Context context, int itemViewResId, ArrayList<Item> mItems){
         super(context, android.R.layout.simple_list_item_1);
         Log.i(TAG,"constructor, create new object");
         this.context = context;
         this.mItems = mItems;
-        this.textViewResId = textViewResId;
+        this.itemViewResId = itemViewResId;
     }
 
     public Item getItem(int position){
@@ -45,7 +45,7 @@ public class MyListAdapter extends ArrayAdapter{
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View item = inflater.inflate(textViewResId, parent, false);
+        View item = inflater.inflate(itemViewResId, parent, false);
 
         TextView nameTextView = (TextView) item.findViewById(R.id.name_item);
         nameTextView.setText(mItems.get(position).getName());

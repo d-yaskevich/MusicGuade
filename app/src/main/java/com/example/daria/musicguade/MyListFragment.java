@@ -2,6 +2,7 @@ package com.example.daria.musicguade;
 
 import android.app.ListFragment;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -27,6 +28,7 @@ public class MyListFragment extends ListFragment {
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
     private final String DEFAULT_PATH = "/mnt/";
 
+    private MyListAdapter adapter;
     private ArrayList<Item> mItems;
     private String path;
 
@@ -46,40 +48,9 @@ public class MyListFragment extends ListFragment {
         Log.i(TAG, "onActivityCreated()");
         setRetainInstance(true);
         mItems = new ArrayList<>();
-        fillItemList(new File(path));
-        MyListAdapter adapter = new MyListAdapter(getActivity(),
-                R.layout.item_fragment, mItems);
+        new FillList().execute(new File(path));
+        adapter = new MyListAdapter(getActivity(), R.layout.item_fragment, mItems);
         setListAdapter(adapter);
-    }
-
-    private void fillItemList(File mFile) {
-        if (mFile.listFiles() != null) {
-            MusicFilter filter = new MusicFilter();
-            File[] listAudioFiles = mFile.listFiles(filter);
-            if (listAudioFiles != null) {
-                Log.i(TAG, "There are " + mFile.listFiles().length
-                        + " elements and " + listAudioFiles.length
-                        + " audio elements in '" + mFile.getName() + "' folder");
-
-                Set<Map.Entry<File, Integer>> foldersNameSet = filter.getSubFolders().entrySet();
-                for (Map.Entry<File, Integer> currentFoldersName : foldersNameSet) {
-                    addFolderToItemList(currentFoldersName.getKey(),
-                            currentFoldersName.getValue());
-                }
-
-                ArrayList<File> filesName = filter.getSubFiles();
-                Collections.sort(filesName);
-                for (File currentFileName : filesName) {
-                    addFileToItemList(currentFileName);
-                }
-                Log.i(TAG, "There are " + foldersNameSet.size()
-                        + " audio folder and " + filesName.size()
-                        + " audio files in '" + mFile.getName() + "' folder");
-
-            } else Log.w(TAG, "There are no audio files in '"
-                    + mFile.getName() + "' folder.");
-        } else Log.w(TAG, "'" + mFile.getName()
-                + "' folder is empty");
     }
 
     @Override
@@ -187,5 +158,51 @@ public class MyListFragment extends ListFragment {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    private class FillList extends AsyncTask<File, Integer, MusicFilter> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected MusicFilter doInBackground(File... params) {
+            if (params[0].listFiles() != null) {
+                MusicFilter filter = new MusicFilter();
+                File[] listAudioFiles = params[0].listFiles(filter);
+                if (listAudioFiles != null) {
+                    Log.i(TAG, "There are " + params[0].listFiles().length
+                            + " elements and " + listAudioFiles.length
+                            + " audio elements in '" + params[0].getName() + "' folder");
+                    Log.i(TAG, "There are " + filter.getSubFolders().size()
+                            + " audio folder and " + filter.getSubFiles().size()
+                            + " audio files in '" + params[0].getName() + "' folder");
+                    return filter;
+                } else Log.w(TAG, "There are no audio files in '"
+                        + params[0].getName() + "' folder.");
+            } else Log.w(TAG, "'" + params[0].getName()
+                    + "' folder is empty");
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(MusicFilter musicFilter) {
+            super.onPostExecute(musicFilter);
+            if (musicFilter != null) {
+                Set<Map.Entry<File, Integer>> foldersNameSet = musicFilter.getSubFolders().entrySet();
+                for (Map.Entry<File, Integer> currentFoldersName : foldersNameSet) {
+                    addFolderToItemList(currentFoldersName.getKey(),
+                            currentFoldersName.getValue());
+                }
+                ArrayList<File> filesName = musicFilter.getSubFiles();
+                Collections.sort(filesName);
+                for (File currentFileName : filesName) {
+                    addFileToItemList(currentFileName);
+                }
+                setListAdapter(adapter);
+            }
+        }
     }
 }

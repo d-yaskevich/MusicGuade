@@ -1,6 +1,3 @@
 <resources>
     <string name="app_name">Music Guade</string>
-
-    <string name="number_list">Files list</string>
-    <string name="empty">Empty fragment</string>
 </resources>
