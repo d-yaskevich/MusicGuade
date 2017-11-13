@@ -202,7 +202,12 @@ public class MyListFragment extends ListFragment {
                     addFileToItemList(currentFileName);
                 }
                 setListAdapter(adapter);
+            } else {
+                Toast.makeText(getActivity(),
+                        "Folder is empty",
+                        Toast.LENGTH_LONG).show();
             }
+
         }
     }
 }
