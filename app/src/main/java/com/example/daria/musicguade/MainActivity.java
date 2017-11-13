@@ -1,29 +1,31 @@
 package com.example.daria.musicguade;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int PERMISSION_REQUEST_CODE = 1;
+    private static final int REQUEST_CODE_EXTERNAL_STORAGE = 1;
     private TextView address;
-    private final String TAG = "MainActivity "+this.hashCode()+" (: ";
+    private final String TAG = "MainActivity " + this.hashCode() + " (: ";
     final static String PATH = "path";
     private final String testPath = "/mnt/sdcard/";
 
     private Fragment fragment;
     private FragmentManager mFragmentManager;
-    private FragmentTransaction mFragmentTransaction;
     private static String FRAGMENT_INSTANCE_NAME = "fragment";
 
     @Override
@@ -33,40 +35,106 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         address = (TextView) findViewById(R.id.address_view);
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED) {
-            address.setText(testPath);
+    }
 
-            mFragmentManager = getFragmentManager();
-            fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
-            if (fragment == null) {
-                fragment = new MyListFragment();
-                Bundle bundle = new Bundle();
-                bundle.putString(PATH, testPath);
-                fragment.setArguments(bundle);
-                mFragmentTransaction = mFragmentManager.beginTransaction();
-                mFragmentTransaction.add(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
-                        .addToBackStack(testPath)
-                        .commit();
-            }
-
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    PERMISSION_REQUEST_CODE);
+    private void createUI() {
+        address.setText(testPath);
+        mFragmentManager = getFragmentManager();
+        fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
+        if (fragment == null) {
+            fragment = new MyListFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString(PATH, testPath);
+            fragment.setArguments(bundle);
+            mFragmentManager.beginTransaction()
+                    .add(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
+                    .commit();
         }
+    }
 
+    private boolean checkPermissions() {
+        int permissionState = ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE);
+        return permissionState == PackageManager.PERMISSION_GRANTED;
+    }
 
+    private void startLocationPermissionRequest() {
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                REQUEST_CODE_EXTERNAL_STORAGE);
+    }
+
+    private void requestPermissions() {
+        boolean shouldProvideRationale =
+                ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION);
+
+        // Provide an additional rationale to the user. This would happen if the user denied the
+        // request previously, but didn't check the "Don't ask again" checkbox.
+        if (shouldProvideRationale) {
+            showAlertDialog(R.string.permission_required,
+                    R.string.permission_message_one,
+                    R.string.settings,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int arg1) {
+                            // Request permission
+                            startLocationPermissionRequest();
+                        }
+                    });
+        } else {
+            Log.i(TAG, "Requesting permission");
+            // Request permission. It's possible this can be auto answered if device policy
+            // sets the permission in a given state or the user denied the permission
+            // previously and checked "Never ask again".
+            startLocationPermissionRequest();
+        }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length == 1) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                address.setText(testPath);
+        if (requestCode == REQUEST_CODE_EXTERNAL_STORAGE) {
+            if (grantResults.length <= 0) {
+                /**
+                 * If user interaction was interrupted, the permission request is cancelled and you
+                 * receive empty arrays.
+                 */
+                fragment = null;
+                Log.w(TAG, "User interaction was cancelled.");
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted.
+                createUI();
             } else {
-                Log.w(TAG, "Permission denied!");
+                /**
+                 * Permission denied.
+                 *
+                 * Notify the user via a SnackBar that they have rejected a core permission for the
+                 * app, which makes the Activity useless. In a real app, core permissions would
+                 * typically be best requested during a welcome-screen flow.
+                 *
+                 * Additionally, it is important to remember that a permission might have been
+                 * rejected without asking the user for permission (device policy or "Never ask
+                 * again" prompts). Therefore, a user interface affordance is typically implemented
+                 * when permissions are denied. Otherwise, your app could appear unresponsive to
+                 * touches or interactions which have required permissions.
+                 */
+                Log.w(TAG, "Permission denied.");
+                showAlertDialog(R.string.permission_required,
+                        R.string.permission_message_two,
+                        R.string.settings,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int arg1) {
+                                // Build intent that displays the App settings screen.
+                                Intent intent = new Intent();
+                                intent.setAction(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package",
+                                        BuildConfig.APPLICATION_ID, null);
+                                intent.setData(uri);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                        });
+                fragment = null;
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -76,6 +144,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         Log.i(TAG, "onStart()");
         super.onStart();
+        if (checkPermissions()) {
+            createUI();
+        } else {
+            requestPermissions();
+        }
     }
 
     @Override
@@ -100,5 +173,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         Log.i(TAG, "onDestroy()");
         super.onDestroy();
+    }
+
+    private void showAlertDialog(final int titleTextStringId,
+                                 final int mainTextStringId,
+                                 final int actionStringId,
+                                 DialogInterface.OnClickListener listener) {
+
+        AlertDialog.Builder ad = new AlertDialog.Builder(this)
+                .setTitle(titleTextStringId)
+                .setMessage(mainTextStringId)
+                .setPositiveButton(actionStringId, listener)
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int arg1) {
+                        //ничего не отображать
+                    }
+                });
+        ad.setCancelable(false).show();
     }
 }
