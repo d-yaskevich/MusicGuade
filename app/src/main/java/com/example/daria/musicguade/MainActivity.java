@@ -17,7 +17,9 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements OnItemSelectedListener{
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity implements OnItemSelectedListener {
 
     private static final int REQUEST_CODE_EXTERNAL_STORAGE = 1;
     private TextView address;
@@ -28,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
     private Fragment fragment;
     private FragmentManager mFragmentManager;
     private static String FRAGMENT_INSTANCE_NAME = "fragment";
+    private ArrayList<Item> mItem = null;
+    final static String ITEM_LIST = "item_list";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +50,9 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
             fragment = new MyListFragment();
             Bundle bundle = new Bundle();
             bundle.putString(PATH, testPath);
+            if (mItem != null) {
+                bundle.putParcelableArrayList(ITEM_LIST,mItem);
+            }
             fragment.setArguments(bundle);
             mFragmentManager.beginTransaction()
                     .add(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
@@ -196,7 +203,17 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
     @Override
     public void onItemSelected(String path) {
         Toast.makeText(this,
-                "PUSH: " + path.replace(testPath,""),
+                "PUSH: " + path.replace(testPath, ""),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void saveData(ArrayList<Item> mItem, String path) {
+        if (path.compareTo(testPath) != 0) {
+            this.mItem = mItem;
+        } else this.mItem = null;
+        Toast.makeText(this,
+                "Save array with path: " + path,
                 Toast.LENGTH_SHORT).show();
     }
 }

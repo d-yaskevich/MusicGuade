@@ -1,5 +1,8 @@
 package com.example.daria.musicguade;
 
+import java.util.ArrayList;
+
 public interface OnItemSelectedListener {
-    public void onItemSelected(String path);
+    void onItemSelected(String path);
+    void saveData(ArrayList<Item> mItem, String path);
 }

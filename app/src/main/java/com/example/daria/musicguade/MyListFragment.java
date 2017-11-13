@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import static com.example.daria.musicguade.MainActivity.ITEM_LIST;
 import static com.example.daria.musicguade.MainActivity.PATH;
 
 public class MyListFragment extends ListFragment {
@@ -60,13 +61,22 @@ public class MyListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView()");
         if(view == null) {
+            Log.d(TAG,"view != null");
             view = inflater.inflate(R.layout.list_fragment, null);
             Bundle bundle = getArguments();
             if (bundle != null) {
+                Log.d(TAG,"bundle != null");
                 path = bundle.getString(PATH);
                 if(mItems == null){
+                    Log.d(TAG,"mItems == null");
                     mItems = new ArrayList<>();
-                    new FillList().execute(new File(path));
+                    if(bundle.getParcelableArrayList(ITEM_LIST) != null
+                            && bundle.getParcelableArrayList(ITEM_LIST).size() != 0){
+                        mItems = bundle.getParcelableArrayList(ITEM_LIST);
+                        Log.d(TAG,"bundle.getParcelableArrayList(ITEM_LIST) != null");
+                    }else{
+                        new FillList().execute(new File(path));
+                    }
                 }
             }
         }
@@ -129,6 +139,7 @@ public class MyListFragment extends ListFragment {
     public void onDetach() {
         Log.i(TAG, "onDetach()");
         super.onDetach();
+        mItemSelectedListener.saveData(mItems,path);
     }
 
     private void addFileToItemList(File file) {
@@ -175,10 +186,6 @@ public class MyListFragment extends ListFragment {
             space += " B";
         }
         return space;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     private class FillList extends AsyncTask<File, Integer, MusicFilter> {
