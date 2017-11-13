@@ -21,9 +21,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import static com.example.daria.musicguade.MainActivity.PATH;
+
 public class MyListFragment extends ListFragment {
 
-    private final String TAG = "MyListFragment (: ";
+    private final String TAG = "MyListFragment "+this.hashCode()+" (: ";
 
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
     private final String DEFAULT_PATH = "/mnt/";
@@ -32,8 +34,11 @@ public class MyListFragment extends ListFragment {
     private ArrayList<Item> mItems;
     private String path;
 
+    View view = null;
+
     public MyListFragment() {
         this.path = DEFAULT_PATH;
+        this.setRetainInstance(true);
     }
 
     @Override
@@ -43,20 +48,28 @@ public class MyListFragment extends ListFragment {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Log.i(TAG, "onActivityCreated()");
-        setRetainInstance(true);
-        mItems = new ArrayList<>();
-        new FillList().execute(new File(path));
-        adapter = new MyListAdapter(getActivity(), R.layout.item_fragment, mItems);
-        setListAdapter(adapter);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.i(TAG, "onCreateView()");
+        if(view == null) {
+            view = inflater.inflate(R.layout.list_fragment, null);
+            Bundle bundle = getArguments();
+            if (bundle != null) {
+                path = bundle.getString(PATH);
+                if(mItems == null){
+                    mItems = new ArrayList<>();
+                    new FillList().execute(new File(path));
+                }
+            }
+        }
+        return view;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.i(TAG, "onCreateView()");
-        return inflater.inflate(R.layout.list_fragment, null);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.i(TAG, "onActivityCreated()");
+        adapter = new MyListAdapter(getActivity(), R.layout.item_fragment, mItems);
+        setListAdapter(adapter);
     }
 
     @Override

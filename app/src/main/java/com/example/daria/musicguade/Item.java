@@ -1,7 +1,5 @@
 package com.example.daria.musicguade;
 
-import android.util.Log;
-
 public class Item {
 
     private final String TAG = "Item (: ";
@@ -13,7 +11,6 @@ public class Item {
     private String path;
 
     public Item(String name, String count, String data, String date, String path) {
-        Log.i(TAG,"constructor, create new object");
         this.name = name;
         if (count.compareTo("") == 0){
             this.count = null;

@@ -1,6 +1,8 @@
 package com.example.daria.musicguade;
 
 import android.Manifest;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -15,10 +17,14 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
     private TextView address;
-    private final String TAG = "MainActivity (: ";
+    private final String TAG = "MainActivity "+this.hashCode()+" (: ";
+    final static String PATH = "path";
     private final String testPath = "/mnt/sdcard/";
 
-    private MyListFragment fragment;
+    private Fragment fragment;
+    private FragmentManager mFragmentManager;
+    private FragmentTransaction mFragmentTransaction;
+    private static String FRAGMENT_INSTANCE_NAME = "fragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,18 +37,27 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED) {
             address.setText(testPath);
+
+            mFragmentManager = getFragmentManager();
+            fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
+            if (fragment == null) {
+                fragment = new MyListFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString(PATH, testPath);
+                fragment.setArguments(bundle);
+                mFragmentTransaction = mFragmentManager.beginTransaction();
+                mFragmentTransaction.add(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
+                        .addToBackStack(testPath)
+                        .commit();
+            }
+
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     PERMISSION_REQUEST_CODE);
         }
 
-        fragment = new MyListFragment();
-        fragment.setPath(testPath);
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.add(R.id.fragment_place, fragment);
-        ft.addToBackStack(null);
-        ft.commit();
+
     }
 
     @Override
