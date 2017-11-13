@@ -17,21 +17,24 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements OnItemSelectedListener {
 
-    private static final int REQUEST_CODE_EXTERNAL_STORAGE = 1;
-    private TextView address;
     private final String TAG = "MainActivity " + this.hashCode() + " (: ";
-    final static String PATH = "path";
-    private final String testPath = "/mnt/sdcard/";
 
+    private static final int REQUEST_CODE_EXTERNAL_STORAGE = 1;
+    public final static String FRAGMENT_INSTANCE_NAME = "fragment";
+    public final static String ITEM_LIST = "item_list";
+
+    private final String testPath = "/mnt/sdcard/";
+    private StringBuffer path;
+    private ArrayList<Item> mItem = null;
+
+    private TextView address;
     private Fragment fragment;
     private FragmentManager mFragmentManager;
-    private static String FRAGMENT_INSTANCE_NAME = "fragment";
-    private ArrayList<Item> mItem = null;
-    final static String ITEM_LIST = "item_list";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,25 +42,38 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         Log.i(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
         address = (TextView) findViewById(R.id.address_view);
-
     }
 
     private void createUI() {
+        if (mItem == null) {
+            mItem = new ArrayList<>();
+        }
         address.setText(testPath);
         mFragmentManager = getFragmentManager();
         fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
         if (fragment == null) {
-            fragment = new MyListFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString(PATH, testPath);
-            if (mItem != null) {
-                bundle.putParcelableArrayList(ITEM_LIST,mItem);
+            ListLoder loder = new ListLoder(this);
+            loder.execute(new File(testPath));
+            /*try {
+                mItem = loder.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
-            fragment.setArguments(bundle);
+            */
+            sendDataToFragment(mItem);
             mFragmentManager.beginTransaction()
                     .add(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
                     .commit();
         }
+    }
+
+    public void sendDataToFragment(ArrayList<Item> item) {
+        fragment = new MyListFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList(ITEM_LIST, item);
+        fragment.setArguments(bundle);
     }
 
     private boolean checkPermissions() {
@@ -207,13 +223,7 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
                 Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void saveData(ArrayList<Item> mItem, String path) {
-        if (path.compareTo(testPath) != 0) {
-            this.mItem = mItem;
-        } else this.mItem = null;
-        Toast.makeText(this,
-                "Save array with path: " + path,
-                Toast.LENGTH_SHORT).show();
+    public Fragment getFragment() {
+        return fragment;
     }
 }

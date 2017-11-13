@@ -2,7 +2,6 @@ package com.example.daria.musicguade;
 
 import android.app.ListFragment;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -10,36 +9,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import java.io.File;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
 
 import static com.example.daria.musicguade.MainActivity.ITEM_LIST;
-import static com.example.daria.musicguade.MainActivity.PATH;
 
 public class MyListFragment extends ListFragment {
 
     private final String TAG = "MyListFragment "+this.hashCode()+" (: ";
 
-    private final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-    private final String DEFAULT_PATH = "/mnt/";
-
+    Bundle bundle;
     private MyListAdapter adapter;
     private ArrayList<Item> mItems;
-    private String path;
     private View view = null;
 
     OnItemSelectedListener mItemSelectedListener;
 
     public MyListFragment() {
-        this.path = DEFAULT_PATH;
         this.setRetainInstance(true);
     }
 
@@ -63,21 +49,13 @@ public class MyListFragment extends ListFragment {
         if(view == null) {
             Log.d(TAG,"view != null");
             view = inflater.inflate(R.layout.list_fragment, null);
-            Bundle bundle = getArguments();
+            bundle = getArguments();
             if (bundle != null) {
                 Log.d(TAG,"bundle != null");
-                path = bundle.getString(PATH);
-                if(mItems == null){
+                //if(mItems == null){
                     Log.d(TAG,"mItems == null");
-                    mItems = new ArrayList<>();
-                    if(bundle.getParcelableArrayList(ITEM_LIST) != null
-                            && bundle.getParcelableArrayList(ITEM_LIST).size() != 0){
-                        mItems = bundle.getParcelableArrayList(ITEM_LIST);
-                        Log.d(TAG,"bundle.getParcelableArrayList(ITEM_LIST) != null");
-                    }else{
-                        new FillList().execute(new File(path));
-                    }
-                }
+                    getDataFromActivity();
+                //}
             }
         }
         return view;
@@ -139,103 +117,18 @@ public class MyListFragment extends ListFragment {
     public void onDetach() {
         Log.i(TAG, "onDetach()");
         super.onDetach();
-        mItemSelectedListener.saveData(mItems,path);
     }
 
-    private void addFileToItemList(File file) {
-        mItems.add(new Item(
-                file.getAbsolutePath().replace(path, ""),
-                "",
-                toBytes(file.getTotalSpace()),
-                formatter.format(new Date(file.lastModified())),
-                file.getAbsolutePath()
-        ));
+    public MyListAdapter getAdapter() {
+        return adapter;
     }
 
-    private void addFolderToItemList(File folder, int count) {
-        mItems.add(new Item(
-                folder.getAbsolutePath().replace(path, ""),
-                toObject(count),
-                "",
-                formatter.format(new Date(folder.lastModified())),
-                folder.getAbsolutePath()
-        ));
+    public void getDataFromActivity() {
+        mItems = new ArrayList<>();
+        mItems = bundle.getParcelableArrayList(ITEM_LIST);
     }
 
-    private String toObject(int length) {
-        String count = String.valueOf(length);
-        if (length == 0 || length == 1) {
-            count += " object";
-        } else count += " objects";
-        return count;
-    }
-
-    private String toBytes(long totalSpace) {
-        String space;
-        if (totalSpace % 1000000000 > 1) {
-            space = new DecimalFormat("#0.00").format((double) totalSpace / 1000000000);
-            space += " GB";
-        } else if (totalSpace % 1000000 > 1) {
-            space = new DecimalFormat("#0.00").format((double) totalSpace / 1000000);
-            space += " MB";
-        } else if (totalSpace % 1000 > 1) {
-            space = new DecimalFormat("#0.00").format((double) totalSpace / 1000);
-            space += " KB";
-        } else {
-            space = String.valueOf(totalSpace);
-            space += " B";
-        }
-        return space;
-    }
-
-    private class FillList extends AsyncTask<File, Integer, MusicFilter> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected MusicFilter doInBackground(File... params) {
-            if (params[0].listFiles() != null) {
-                MusicFilter filter = new MusicFilter();
-                File[] listAudioFiles = params[0].listFiles(filter);
-                if (listAudioFiles != null) {
-                    Log.i(TAG, "There are " + params[0].listFiles().length
-                            + " elements and " + listAudioFiles.length
-                            + " audio elements in '" + params[0].getName() + "' folder");
-                    Log.i(TAG, "There are " + filter.getSubFolders().size()
-                            + " audio folder and " + filter.getSubFiles().size()
-                            + " audio files in '" + params[0].getName() + "' folder");
-                    return filter;
-                } else Log.w(TAG, "There are no audio files in '"
-                        + params[0].getName() + "' folder.");
-            } else Log.w(TAG, "'" + params[0].getName()
-                    + "' folder is empty");
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(MusicFilter musicFilter) {
-            super.onPostExecute(musicFilter);
-            if (musicFilter != null) {
-                Set<Map.Entry<File, Integer>> foldersNameSet = musicFilter.getSubFolders().entrySet();
-                for (Map.Entry<File, Integer> currentFoldersName : foldersNameSet) {
-                    addFolderToItemList(currentFoldersName.getKey(),
-                            currentFoldersName.getValue());
-                }
-                ArrayList<File> filesName = musicFilter.getSubFiles();
-                Collections.sort(filesName);
-                for (File currentFileName : filesName) {
-                    addFileToItemList(currentFileName);
-                }
-                setListAdapter(adapter);
-            } else {
-                Toast.makeText(getActivity(),
-                        "Folder is empty",
-                        Toast.LENGTH_LONG).show();
-            }
-
-        }
+    public void setItems(ArrayList<Item> items) {
+        mItems = items;
     }
 }
