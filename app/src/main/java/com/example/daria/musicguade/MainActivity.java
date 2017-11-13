@@ -15,8 +15,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnItemSelectedListener{
 
     private static final int REQUEST_CODE_EXTERNAL_STORAGE = 1;
     private TextView address;
@@ -190,5 +191,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         ad.setCancelable(false).show();
+    }
+
+    @Override
+    public void onItemSelected(String path) {
+        Toast.makeText(this,
+                "PUSH: " + path.replace(testPath,""),
+                Toast.LENGTH_SHORT).show();
     }
 }

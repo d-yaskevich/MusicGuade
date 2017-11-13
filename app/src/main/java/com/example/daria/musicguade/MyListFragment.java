@@ -33,8 +33,9 @@ public class MyListFragment extends ListFragment {
     private MyListAdapter adapter;
     private ArrayList<Item> mItems;
     private String path;
+    private View view = null;
 
-    View view = null;
+    OnItemSelectedListener mItemSelectedListener;
 
     public MyListFragment() {
         this.path = DEFAULT_PATH;
@@ -45,6 +46,14 @@ public class MyListFragment extends ListFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         Log.i(TAG, "onAttach()");
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mItemSelectedListener = (OnItemSelectedListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement OnHeadlineSelectedListener");
+        }
     }
 
     @Override
@@ -87,10 +96,9 @@ public class MyListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-
-        Toast.makeText(getActivity(),
-                "PUSH " + getListView().getItemAtPosition(position).toString(),
-                Toast.LENGTH_LONG).show();
+        Item item = (Item) getListView().getItemAtPosition(position);
+        // Send the event to the host activity
+        mItemSelectedListener.onItemSelected(item.getPath());
     }
 
     @Override
