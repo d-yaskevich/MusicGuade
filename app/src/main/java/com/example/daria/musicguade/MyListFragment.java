@@ -25,7 +25,7 @@ public class MyListFragment extends ListFragment {
     private View view = null;
     private String path;
 
-    OnItemSelectedListener mItemSelectedListener;
+    OnChangeFragmentStateListener mFragmentStateListener;
 
     public MyListFragment() {
         this.setRetainInstance(true);
@@ -36,7 +36,7 @@ public class MyListFragment extends ListFragment {
         super.onAttach(context);
         Log.i(TAG, "onAttach()");
         try {
-            mItemSelectedListener = (OnItemSelectedListener) context;
+            mFragmentStateListener = (OnChangeFragmentStateListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " must implement OnHeadlineSelectedListener");
@@ -57,7 +57,7 @@ public class MyListFragment extends ListFragment {
             }
         }
         if (path != null) {
-            mItemSelectedListener.putPath(path + File.separator);
+            mFragmentStateListener.uploadPath(path + File.separator);
         }
         return view;
     }
@@ -86,7 +86,7 @@ public class MyListFragment extends ListFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         Item item = (Item) getListView().getItemAtPosition(position);
-        mItemSelectedListener.onItemSelected(item.getPath());
+        mFragmentStateListener.onItemSelected(item.getPath());
     }
 
     @Override

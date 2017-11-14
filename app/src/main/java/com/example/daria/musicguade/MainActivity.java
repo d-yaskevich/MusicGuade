@@ -20,7 +20,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements OnChangeFragmentStateListener {
 
     private final String TAG = "MainActivity " + this.hashCode() + " (: ";
 
@@ -32,7 +32,8 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
     public static final String PATH_FOR_UI = "sdcard";
     public static String pathMain = "/mnt/sdcard";
     private String path = pathMain;
-    private ArrayList<Item> mItem = null;
+    private ArrayList<Item> mItem = new ArrayList<>();
+    ;
 
     public TextView address;
     private Fragment fragment;
@@ -44,30 +45,6 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         Log.i(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
         address = (TextView) findViewById(R.id.address_view);
-    }
-
-    private void createUI() {
-        if (mItem == null) {
-            mItem = new ArrayList<>();
-        }
-        mFragmentManager = getFragmentManager();
-        fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
-        if (fragment == null) {
-            sendDataToNewFragment(mItem);
-            ListLoder loder = new ListLoder((MyListFragment)fragment);
-            loder.execute(new File(path));
-            mFragmentManager.beginTransaction()
-                    .add(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
-                    .commit();
-        }
-    }
-
-    public void sendDataToNewFragment(ArrayList<Item> item) {
-        fragment = new MyListFragment();
-        Bundle bundle = new Bundle();
-        bundle.putString(PATH,path);
-        bundle.putParcelableArrayList(ITEM_LIST, item);
-        fragment.setArguments(bundle);
     }
 
     @Override
@@ -87,32 +64,50 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         super.onResume();
     }
 
+    private void createUI() {
+        mFragmentManager = getFragmentManager();
+        fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
+        if (fragment == null) {
+            fragment = createFragmentWithData(mItem);
+            ListLoder loder = new ListLoder((MyListFragment) fragment);
+            loder.execute(new File(path));
+            mFragmentManager.beginTransaction()
+                    .add(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
+                    .commit();
+        }
+    }
+
+    public MyListFragment createFragmentWithData(ArrayList<Item> item) {
+        MyListFragment fragment = new MyListFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(PATH, path);
+        bundle.putParcelableArrayList(ITEM_LIST, item);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
     @Override
     public void onItemSelected(String newPath) {
         path = newPath;
         File file = new File(path);
-        if(file.isDirectory()){
+        if (file.isDirectory()) {
             mItem = new ArrayList<>();
-            sendDataToNewFragment(mItem);
-            ListLoder loder = new ListLoder((MyListFragment)fragment);
+            fragment = createFragmentWithData(mItem);
+            ListLoder loder = new ListLoder((MyListFragment) fragment);
             loder.execute(file);
             mFragmentManager.beginTransaction()
                     .replace(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
                     .addToBackStack(null)
                     .commit();
-        }else{
-            Toast.makeText(this,"Can not open this file :(", Toast.LENGTH_SHORT)
+        } else {
+            Toast.makeText(this, "Can not open this file :(", Toast.LENGTH_SHORT)
                     .show();
         }
     }
 
     @Override
-    public void putPath(String path) {
-        address.setText(path.replace(pathMain,PATH_FOR_UI));
-    }
-
-    public Fragment getFragment() {
-        return fragment;
+    public void uploadPath(String path) {
+        address.setText(path.replace(pathMain, PATH_FOR_UI));
     }
 
     @Override
