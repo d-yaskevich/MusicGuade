@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class MyListAdapter extends ArrayAdapter{
+public class MyListAdapter extends ArrayAdapter {
 
     private final String TAG = "MyListAdapter (: ";
 
@@ -21,15 +21,15 @@ public class MyListAdapter extends ArrayAdapter{
     private ArrayList<Item> mItems;
     private int itemViewResId;
 
-    public MyListAdapter(Context context, int itemViewResId, ArrayList<Item> mItems){
+    public MyListAdapter(Context context, int itemViewResId, ArrayList<Item> mItems) {
         super(context, android.R.layout.simple_list_item_1);
-        Log.i(TAG,"constructor, create new object");
+        Log.i(TAG, "constructor, create new object");
         this.context = context;
         this.mItems = mItems;
         this.itemViewResId = itemViewResId;
     }
 
-    public Item getItem(int position){
+    public Item getItem(int position) {
         return mItems.get(position);
     }
 
@@ -53,15 +53,14 @@ public class MyListAdapter extends ArrayAdapter{
         TextView dateTextView = (TextView) item.findViewById(R.id.info_item);
         dateTextView.setText(mItems.get(position).getDate());
 
-        TextView subTextView = (TextView) item.findViewById(R.id.subname_item);
         ImageView iconImageView = (ImageView) item.findViewById(R.id.icon_item);
+        iconImageView.setImageResource(mItems.get(position).getImage());
 
-        if(mItems.get(position).isFolder()){
+        TextView subTextView = (TextView) item.findViewById(R.id.subname_item);
+        if (mItems.get(position).isFolder()) {
             subTextView.setText(mItems.get(position).getCount());
-            iconImageView.setImageResource(R.drawable.ic_folder_black_24px);
-        }else {
+        } else {
             subTextView.setText(mItems.get(position).getData());
-            iconImageView.setImageResource(R.drawable.ic_music_note_black_24px);
         }
         return item;
     }

@@ -19,6 +19,7 @@ public class Item implements Parcelable {
     private String data;
     private String date;
     private String path;
+    private int image;
 
     protected Item(Parcel in) {
         name = in.readString();
@@ -26,6 +27,7 @@ public class Item implements Parcelable {
         data = in.readString();
         date = in.readString();
         path = in.readString();
+        image = in.readInt();
     }
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -43,23 +45,27 @@ public class Item implements Parcelable {
     public Item(String path, File file, int count) {
         if (file.isDirectory()) {
             this.count = toObject(count);
-        }else {
+            this.image = R.drawable.ic_folder_black_24px;
+        } else {
             this.count = null;
+            this.image = R.drawable.ic_music_note_black_24px;
         }
         this.name = file.getAbsolutePath().replace(path + File.separator, "");
-        this.data = toBytes(file.getTotalSpace());
+        this.data = "";
         this.date = formatter.format(new Date(file.lastModified()));
         this.path = file.getAbsolutePath();
     }
 
     public Item(String path, File file) {
         if (file.isDirectory()) {
+            this.image = R.drawable.ic_folder_black_24px;
             this.count = "0";
-        }else {
+        } else {
+            this.image = R.drawable.ic_music_note_black_24px;
             this.count = null;
         }
         this.name = file.getAbsolutePath().replace(path + File.separator, "");
-        this.data = toBytes(file.getTotalSpace());
+        this.data = toBytes(file.length());
         this.date = formatter.format(new Date(file.lastModified()));
         this.path = file.getAbsolutePath();
     }
@@ -107,6 +113,7 @@ public class Item implements Parcelable {
         dest.writeString(data);
         dest.writeString(date);
         dest.writeString(path);
+        dest.writeInt(image);
     }
 
     public static String toObject(int length) {
@@ -119,19 +126,20 @@ public class Item implements Parcelable {
 
     public static String toBytes(long totalSpace) {
         String space;
-        if (totalSpace % 1000000000 > 1) {
-            space = new DecimalFormat("#0.00").format((double) totalSpace / 1000000000);
-            space += " GB";
-        } else if (totalSpace % 1000000 > 1) {
-            space = new DecimalFormat("#0.00").format((double) totalSpace / 1000000);
+        if (totalSpace / (1024 * 1024) > 1) {
+            space = new DecimalFormat("#0.00").format((double) totalSpace / (1024 * 1024));
             space += " MB";
-        } else if (totalSpace % 1000 > 1) {
-            space = new DecimalFormat("#0.00").format((double) totalSpace / 1000);
+        } else if (totalSpace / 1024 > 1) {
+            space = new DecimalFormat("#0.00").format((double) totalSpace / 1024);
             space += " KB";
         } else {
             space = String.valueOf(totalSpace);
             space += " B";
         }
         return space;
+    }
+
+    public int getImage() {
+        return image;
     }
 }
