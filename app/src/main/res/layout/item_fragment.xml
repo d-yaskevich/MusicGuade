@@ -15,11 +15,13 @@
 
     <TextView
         android:id="@+id/name_item"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginTop="4dp"
         android:layout_toRightOf="@+id/icon_item"
+        android:maxLines="1"
         android:text="Name file or directory"
         android:textSize="16sp"
         android:textStyle="bold">
