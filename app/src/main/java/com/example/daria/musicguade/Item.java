@@ -44,7 +44,7 @@ public class Item implements Parcelable {
         if (file.isDirectory()) {
             this.count = toObject(count);
         }else {
-            this.count = "";
+            this.count = null;
         }
         this.name = file.getAbsolutePath().replace(path + File.separator, "");
         this.data = toBytes(file.getTotalSpace());
@@ -56,7 +56,7 @@ public class Item implements Parcelable {
         if (file.isDirectory()) {
             this.count = "0";
         }else {
-            this.count = "";
+            this.count = null;
         }
         this.name = file.getAbsolutePath().replace(path + File.separator, "");
         this.data = toBytes(file.getTotalSpace());
