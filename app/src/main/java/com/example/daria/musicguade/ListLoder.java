@@ -12,8 +12,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import static com.example.daria.musicguade.MainActivity.FRAGMENT_INSTANCE_NAME;
-
 /**
  * Created by yakov on 13.11.2017.
  */
@@ -23,23 +21,23 @@ public class ListLoder extends AsyncTask<File, Integer, ArrayList<Item>> {
     private final String TAG = "ListLoder (: ";
 
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-    private final String DEFAULT_PATH = "/mnt/";
 
-    private MainActivity main;
-    private ArrayList<Item> mItems;
-    private String path;
+    private MyListFragment fragment;
 
-    public ListLoder(MainActivity mainActivity) {
-        this.main = mainActivity;
-        mItems = new ArrayList<>();
+    public ListLoder(MyListFragment fragment) {
+        this.fragment = fragment;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
     }
 
     @Override
     protected ArrayList<Item> doInBackground(File... params) {
-        if (params[0] == null) {
-            path = DEFAULT_PATH;
-        } else {
-            path = params[0].getAbsolutePath();
+        ArrayList<Item> mItems = new ArrayList<>();
+        if (params[0] != null){
+            String path = params[0].getAbsolutePath();
             if (params[0].listFiles() != null) {
                 MusicFilter filter = new MusicFilter();
                 File[] listAudioFiles = params[0].listFiles(filter);
@@ -52,14 +50,15 @@ public class ListLoder extends AsyncTask<File, Integer, ArrayList<Item>> {
                             + " audio files in '" + params[0].getName() + "' folder");
 
                     Set<Map.Entry<File, Integer>> foldersNameSet = filter.getSubFolders().entrySet();
+                    Log.d(TAG,"folder absolute path: "+path);
                     for (Map.Entry<File, Integer> currentFoldersName : foldersNameSet) {
-                        addFolderToItemList(currentFoldersName.getKey(),
+                        addFolderToItemList(mItems, currentFoldersName.getKey(), path,
                                 currentFoldersName.getValue());
                     }
                     ArrayList<File> filesName = filter.getSubFiles();
                     Collections.sort(filesName);
                     for (File currentFileName : filesName) {
-                        addFileToItemList(currentFileName);
+                        addFileToItemList(mItems, currentFileName, path);
                     }
                     return mItems;
                 } else Log.w(TAG, "There are no audio files in '"
@@ -73,16 +72,12 @@ public class ListLoder extends AsyncTask<File, Integer, ArrayList<Item>> {
     @Override
     protected void onPostExecute(ArrayList<Item> items) {
         super.onPostExecute(items);
-        mItems = items;
-        main.sendDataToFragment(mItems);
-        main.getFragmentManager().beginTransaction()
-                .replace(R.id.fragment_place, main.getFragment(), FRAGMENT_INSTANCE_NAME)
-                .commit();
+        fragment.setNewItems(items);
     }
 
-    private void addFileToItemList(File file) {
+    private void addFileToItemList(ArrayList<Item> mItems, File file, String path) {
         mItems.add(new Item(
-                file.getAbsolutePath().replace(path, ""),
+                file.getAbsolutePath().replace(path+File.separator, ""),
                 "",
                 toBytes(file.getTotalSpace()),
                 formatter.format(new Date(file.lastModified())),
@@ -90,9 +85,10 @@ public class ListLoder extends AsyncTask<File, Integer, ArrayList<Item>> {
         ));
     }
 
-    private void addFolderToItemList(File folder, int count) {
+    private void addFolderToItemList(ArrayList<Item> mItems, File folder, String path, int count) {
+        Log.d(TAG,"subfolder absolute path:"+folder.getAbsolutePath());
         mItems.add(new Item(
-                folder.getAbsolutePath().replace(path, ""),
+                folder.getAbsolutePath().replace(path+File.separator, ""),
                 toObject(count),
                 "",
                 formatter.format(new Date(folder.lastModified())),

@@ -26,13 +26,15 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
 
     private static final int REQUEST_CODE_EXTERNAL_STORAGE = 1;
     public final static String FRAGMENT_INSTANCE_NAME = "fragment";
+    public final static String PATH = "path";
     public final static String ITEM_LIST = "item_list";
 
-    private final String testPath = "/mnt/sdcard/";
-    private StringBuffer path;
+    public static final String PATH_FOR_UI = "sdcard";
+    public static String pathMain = "/mnt/sdcard";
+    private String path = pathMain;
     private ArrayList<Item> mItem = null;
 
-    private TextView address;
+    public TextView address;
     private Fragment fragment;
     private FragmentManager mFragmentManager;
 
@@ -48,32 +50,88 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         if (mItem == null) {
             mItem = new ArrayList<>();
         }
-        address.setText(testPath);
+        address.setText(path.replace(pathMain,PATH_FOR_UI));
         mFragmentManager = getFragmentManager();
         fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
         if (fragment == null) {
-            ListLoder loder = new ListLoder(this);
-            loder.execute(new File(testPath));
-            /*try {
-                mItem = loder.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-            */
-            sendDataToFragment(mItem);
+            sendDataToNewFragment(mItem);
+            ListLoder loder = new ListLoder((MyListFragment)fragment);
+            loder.execute(new File(path));
             mFragmentManager.beginTransaction()
                     .add(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
                     .commit();
         }
     }
 
-    public void sendDataToFragment(ArrayList<Item> item) {
+    public void sendDataToNewFragment(ArrayList<Item> item) {
         fragment = new MyListFragment();
         Bundle bundle = new Bundle();
+        bundle.putString(PATH,path);
         bundle.putParcelableArrayList(ITEM_LIST, item);
         fragment.setArguments(bundle);
+    }
+
+    @Override
+    protected void onStart() {
+        Log.i(TAG, "onStart()");
+        super.onStart();
+        if (checkPermissions()) {
+            createUI();
+        } else {
+            requestPermissions();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        Log.i(TAG, "onResume()");
+        super.onResume();
+    }
+
+    @Override
+    public void onItemSelected(String newPath) {
+        path = newPath;
+        File file = new File(path);
+        if(file.isDirectory()){
+            mItem = new ArrayList<>();
+            sendDataToNewFragment(mItem);
+            ListLoder loder = new ListLoder((MyListFragment)fragment);
+            loder.execute(file);
+            mFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
+                    .addToBackStack(null)
+                    .commit();
+        }else{
+            Toast.makeText(this,"Can not open this file :(", Toast.LENGTH_SHORT)
+                    .show();
+        }
+    }
+
+    @Override
+    public void putPath(String path) {
+        address.setText(path.replace(pathMain,PATH_FOR_UI));
+    }
+
+    public Fragment getFragment() {
+        return fragment;
+    }
+
+    @Override
+    protected void onPause() {
+        Log.i(TAG, "onPause()");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.i(TAG, "onStop()");
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.i(TAG, "onDestroy()");
+        super.onDestroy();
     }
 
     private boolean checkPermissions() {
@@ -164,41 +222,6 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    @Override
-    protected void onStart() {
-        Log.i(TAG, "onStart()");
-        super.onStart();
-        if (checkPermissions()) {
-            createUI();
-        } else {
-            requestPermissions();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        Log.i(TAG, "onResume()");
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        Log.i(TAG, "onPause()");
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        Log.i(TAG, "onStop()");
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.i(TAG, "onDestroy()");
-        super.onDestroy();
-    }
-
     private void showAlertDialog(final int titleTextStringId,
                                  final int mainTextStringId,
                                  final int actionStringId,
@@ -214,16 +237,5 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
                     }
                 });
         ad.setCancelable(false).show();
-    }
-
-    @Override
-    public void onItemSelected(String path) {
-        Toast.makeText(this,
-                "PUSH: " + path.replace(testPath, ""),
-                Toast.LENGTH_SHORT).show();
-    }
-
-    public Fragment getFragment() {
-        return fragment;
     }
 }
