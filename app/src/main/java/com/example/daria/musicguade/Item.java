@@ -3,25 +3,22 @@ package com.example.daria.musicguade;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.File;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Item implements Parcelable {
 
     private final String TAG = "Item (: ";
+
+    public static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
     private String name;
     private String count;
     private String data;
     private String date;
     private String path;
-
-    public Item(String name, String count, String data, String date, String path) {
-        this.name = name;
-        if (count.compareTo("") == 0) {
-            this.count = null;
-        } else this.count = count;
-        this.data = data;
-        this.date = date;
-        this.path = path;
-    }
 
     protected Item(Parcel in) {
         name = in.readString();
@@ -42,6 +39,30 @@ public class Item implements Parcelable {
             return new Item[size];
         }
     };
+
+    public Item(String path, File file, int count) {
+        if (file.isDirectory()) {
+            this.count = toObject(count);
+        }else {
+            this.count = "";
+        }
+        this.name = file.getAbsolutePath().replace(path + File.separator, "");
+        this.data = toBytes(file.getTotalSpace());
+        this.date = formatter.format(new Date(file.lastModified()));
+        this.path = file.getAbsolutePath();
+    }
+
+    public Item(String path, File file) {
+        if (file.isDirectory()) {
+            this.count = "0";
+        }else {
+            this.count = "";
+        }
+        this.name = file.getAbsolutePath().replace(path + File.separator, "");
+        this.data = toBytes(file.getTotalSpace());
+        this.date = formatter.format(new Date(file.lastModified()));
+        this.path = file.getAbsolutePath();
+    }
 
     public String getName() {
         return name;
@@ -86,5 +107,31 @@ public class Item implements Parcelable {
         dest.writeString(data);
         dest.writeString(date);
         dest.writeString(path);
+    }
+
+    public static String toObject(int length) {
+        String count = String.valueOf(length);
+        if (length == 0 || length == 1) {
+            count += " object";
+        } else count += " objects";
+        return count;
+    }
+
+    public static String toBytes(long totalSpace) {
+        String space;
+        if (totalSpace % 1000000000 > 1) {
+            space = new DecimalFormat("#0.00").format((double) totalSpace / 1000000000);
+            space += " GB";
+        } else if (totalSpace % 1000000 > 1) {
+            space = new DecimalFormat("#0.00").format((double) totalSpace / 1000000);
+            space += " MB";
+        } else if (totalSpace % 1000 > 1) {
+            space = new DecimalFormat("#0.00").format((double) totalSpace / 1000);
+            space += " KB";
+        } else {
+            space = String.valueOf(totalSpace);
+            space += " B";
+        }
+        return space;
     }
 }
