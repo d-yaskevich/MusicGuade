@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity implements OnItemSelectedLis
         if (mItem == null) {
             mItem = new ArrayList<>();
         }
-        address.setText(path.replace(pathMain,PATH_FOR_UI));
         mFragmentManager = getFragmentManager();
         fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
         if (fragment == null) {

@@ -128,4 +128,8 @@ public class MyListFragment extends ListFragment {
             Log.e(TAG, "New Item List is empty");
         }
     }
+
+    public String getPath() {
+        return path;
+    }
 }
