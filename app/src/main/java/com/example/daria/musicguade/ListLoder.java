@@ -26,7 +26,7 @@ public class ListLoder extends AsyncTask<File, Integer, ArrayList<Item>> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        Log.i(TAG,"Start to loading . . . ");
+        Log.i(TAG, "Start loading . . . ");
     }
 
     @Override
@@ -38,13 +38,6 @@ public class ListLoder extends AsyncTask<File, Integer, ArrayList<Item>> {
                 MusicFilter filter = new MusicFilter();
                 File[] listAudioFiles = params[0].listFiles(filter);
                 if (listAudioFiles != null) {
-                    Log.i(TAG, "There are " + params[0].listFiles().length
-                            + " elements and " + listAudioFiles.length
-                            + " audio elements in '" + params[0].getName() + "' folder");
-                    Log.i(TAG, "There are " + filter.getSubFolders().size()
-                            + " audio folder and " + filter.getSubFiles().size()
-                            + " audio files in '" + params[0].getName() + "' folder");
-
                     Set<Map.Entry<File, Integer>> foldersNameSet = filter.getSubFolders().entrySet();
                     for (Map.Entry<File, Integer> currentFoldersName : foldersNameSet) {
                         mItems.add(new Item(path,
@@ -59,19 +52,17 @@ public class ListLoder extends AsyncTask<File, Integer, ArrayList<Item>> {
                     }
                     return mItems;
                 } else Log.w(TAG, "There are no audio files in '"
-                        + params[0].getName() + "' folder.");
-            } else {
-                Log.w(TAG, "'" + params[0].getName()
-                        + "' folder is empty");
-            }
-        }
+                        + params[0].getName() + "' folder");
+            } else Log.w(TAG, "'" + params[0].getName()
+                    + "' folder is empty");
+        } else Log.w(TAG, "Inner file is null");
         return null;
     }
 
     @Override
     protected void onPostExecute(ArrayList<Item> items) {
         super.onPostExecute(items);
-        Log.i(TAG," . . . Finish to loading!");
+        Log.i(TAG, " . . . Finish loading!");
         if (items == null) {
             items = new ArrayList<>();
             items.add(new Item("/mnt", new File(fragment.getPath()), 0));

@@ -33,7 +33,6 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
     public static String pathMain = "/mnt/sdcard";
     private String path = pathMain;
     private ArrayList<Item> mItem = new ArrayList<>();
-    ;
 
     public TextView address;
     private Fragment fragment;
@@ -64,6 +63,11 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
         super.onResume();
     }
 
+    /**
+     * Create UI as a fragment.
+     * If the old fragment does not found:
+     * creates a new one with create new data for it.
+     */
     private void createUI() {
         mFragmentManager = getFragmentManager();
         fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
@@ -77,6 +81,11 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
         }
     }
 
+    /**
+     * Create new fragment and push data to the fragment.
+     * @param item data to send
+     * @return new object MyListFragment class
+     */
     public MyListFragment createFragmentWithData(ArrayList<Item> item) {
         MyListFragment fragment = new MyListFragment();
         Bundle bundle = new Bundle();
@@ -128,41 +137,52 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
         super.onDestroy();
     }
 
+    /**
+     * Check permission READ_EXTERNAL_STORAGE
+     * @return true if permission granted,
+     * false otherwise
+     */
     private boolean checkPermissions() {
         int permissionState = ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE);
         return permissionState == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void startLocationPermissionRequest() {
+    /**
+     * Start the request for permission READ_EXTERNAL_STORAGE
+     */
+    private void startPermissionRequest() {
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                 REQUEST_CODE_EXTERNAL_STORAGE);
     }
 
+    /**
+     * Checks whether it is necessary to provide additional rationale to the user.
+     */
     private void requestPermissions() {
         boolean shouldProvideRationale =
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION);
+                        Manifest.permission.READ_EXTERNAL_STORAGE);
 
-        // Provide an additional rationale to the user. This would happen if the user denied the
-        // request previously, but didn't check the "Don't ask again" checkbox.
         if (shouldProvideRationale) {
+            // This would happen if the user denied the request previously,
+            // but didn't check the "Don't ask again" checkbox.
             showAlertDialog(R.string.permission_required,
                     R.string.permission_message_one,
                     R.string.settings,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int arg1) {
                             // Request permission
-                            startLocationPermissionRequest();
+                            startPermissionRequest();
                         }
                     });
         } else {
             Log.i(TAG, "Requesting permission");
-            // Request permission. It's possible this can be auto answered if device policy
+            // It's possible this can be auto answered if device policy
             // sets the permission in a given state or the user denied the permission
             // previously and checked "Never ask again".
-            startLocationPermissionRequest();
+            startPermissionRequest();
         }
     }
 
@@ -170,29 +190,19 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_CODE_EXTERNAL_STORAGE) {
             if (grantResults.length <= 0) {
-                /**
-                 * If user interaction was interrupted, the permission request is cancelled and you
-                 * receive empty arrays.
-                 */
-                fragment = null;
+                //If user interaction was interrupted, the permission request is cancelled and you
+                //receive empty arrays.
+                if(fragment != null){
+                    mFragmentManager.beginTransaction().remove(fragment);
+                }
                 Log.w(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted.
                 createUI();
             } else {
-                /**
-                 * Permission denied.
-                 *
-                 * Notify the user via a SnackBar that they have rejected a core permission for the
-                 * app, which makes the Activity useless. In a real app, core permissions would
-                 * typically be best requested during a welcome-screen flow.
-                 *
-                 * Additionally, it is important to remember that a permission might have been
-                 * rejected without asking the user for permission (device policy or "Never ask
-                 * again" prompts). Therefore, a user interface affordance is typically implemented
-                 * when permissions are denied. Otherwise, your app could appear unresponsive to
-                 * touches or interactions which have required permissions.
-                 */
+                //Permission denied.
+                //Notify the user via a AlertDialog that they have rejected a core permission for the
+                //app, which makes the Activity useless.
                 Log.w(TAG, "Permission denied.");
                 showAlertDialog(R.string.permission_required,
                         R.string.permission_message_two,
@@ -210,12 +220,22 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
                                 startActivity(intent);
                             }
                         });
-                fragment = null;
+                if(fragment != null){
+                    mFragmentManager.beginTransaction().remove(fragment);
+                }
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    /**
+     * Build and show AlertDialog with two buttons.
+     * Nothing will happen when the negative button is pressed.
+     * @param titleTextStringId string Id for title
+     * @param mainTextStringId string Id for content
+     * @param actionStringId strind Id for positive button
+     * @param listener action when positive button is pressed     *
+     */
     private void showAlertDialog(final int titleTextStringId,
                                  final int mainTextStringId,
                                  final int actionStringId,
@@ -227,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
                 .setPositiveButton(actionStringId, listener)
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int arg1) {
-                        //ничего не отображать
+                        //to do nothing
                     }
                 });
         ad.setCancelable(false).show();

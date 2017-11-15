@@ -35,8 +35,6 @@ public class MusicFilter implements FileFilter {
             String[] list = pathname.list(new MusicFileFilter());
             if (list != null && list.length != 0) {
                 mSubFolders.put(pathname, list.length);
-                /*Log.d(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "") + "' folder contain "
-                        + list.length + " audio files.");*/
                 return true;
             } else {
                 MusicFilter filter = new MusicFilter();
@@ -44,23 +42,18 @@ public class MusicFilter implements FileFilter {
                 if (listAudioFiles != null && listAudioFiles.length != 0) {
                     if (listAudioFiles.length == 1
                             && listAudioFiles[0].isDirectory()) {
-                        //Log.d(TAG, "'" + listAudioFiles[0].getAbsolutePath().replace(testPath, "") + "' once folder!");
                         mSubFolders.putAll(filter.getSubFolders());
                     } else {
                         mSubFolders.put(pathname, listAudioFiles.length);
-                        /*Log.d(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "")
-                                + "' folder correct! There are " + listAudioFiles.length + " objects.");*/
                     }
                     return true;
-                }/*else Log.w(TAG, "'" + pathname.getAbsolutePath().replace(testPath, "")
-                    + "' folder is not displayed. There are no audio files in this folder.");*/
+                }
             }
         } else {
             if (isAudioFile(pathname.getName())) {
                 mSubFiles.add(pathname);
                 return true;
-            } /*else Log.w(TAG, "'" + pathname.getName()
-                    + "' file is not displayed. This isn't an audio file");*/
+            }
         }
         return false;
     }
@@ -89,7 +82,6 @@ public class MusicFilter implements FileFilter {
     }
 
     private class MusicFileFilter implements FilenameFilter {
-
         @Override
         public boolean accept(File dir, String name) {
             if (isAudioFile(name)) {

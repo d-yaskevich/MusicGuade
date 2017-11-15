@@ -41,7 +41,6 @@ public class MyListFragment extends ListFragment {
             throw new ClassCastException(context.toString()
                     + " must implement OnHeadlineSelectedListener");
         }
-
     }
 
     @Override
@@ -119,6 +118,10 @@ public class MyListFragment extends ListFragment {
         super.onDetach();
     }
 
+    /**
+     * Upload fragment information
+     * @param items new data of list
+     */
     public void setNewItems(ArrayList<Item> items) {
         try {
             mItems = items;
