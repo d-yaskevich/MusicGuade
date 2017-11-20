@@ -2,6 +2,7 @@ package com.example.daria.musicguade;
 
 import android.app.ListFragment;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -12,8 +13,10 @@ import android.widget.ListView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
-import static com.example.daria.musicguade.MainActivity.ITEM_LIST;
 import static com.example.daria.musicguade.MainActivity.PATH;
 
 public class MyListFragment extends ListFragment {
@@ -35,12 +38,7 @@ public class MyListFragment extends ListFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         Log.i(TAG, "onAttach()");
-        try {
-            mFragmentStateListener = (OnChangeFragmentStateListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement OnHeadlineSelectedListener");
-        }
+        mFragmentStateListener = (OnChangeFragmentStateListener) context;
     }
 
     @Override
@@ -50,9 +48,9 @@ public class MyListFragment extends ListFragment {
             view = inflater.inflate(R.layout.list_fragment, null);
             Bundle bundle = getArguments();
             if (bundle != null) {
-                path = bundle.getString(PATH);
                 mItems = new ArrayList<>();
-                mItems = bundle.getParcelableArrayList(ITEM_LIST);
+                path = bundle.getString(PATH);
+                new ListLoder().execute(new File(path));
             }
         }
         if (path != null) {
@@ -65,8 +63,7 @@ public class MyListFragment extends ListFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Log.i(TAG, "onActivityCreated()");
-        adapter = new MyListAdapter(getActivity(), R.layout.item_fragment, mItems);
-        setListAdapter(adapter);
+        setNewItems(mItems);
     }
 
     @Override
@@ -120,19 +117,69 @@ public class MyListFragment extends ListFragment {
 
     /**
      * Upload fragment information
+     *
      * @param items new data of list
      */
     public void setNewItems(ArrayList<Item> items) {
-        try {
-            mItems = items;
-            adapter = new MyListAdapter(getActivity(), R.layout.item_fragment, mItems);
+        if (items != null) {
+            adapter = new MyListAdapter(getActivity(), R.layout.item_fragment, items);
             setListAdapter(adapter);
-        } catch (NullPointerException e) {
-            Log.e(TAG, "New Item List is empty");
+        } else {
+            items = new ArrayList<>();
+            items.add(new Item("/mnt", new File(getPath()), 0));
         }
     }
 
     public String getPath() {
         return path;
+    }
+
+    public class ListLoder extends AsyncTask<File, Integer, ArrayList<Item>> {
+
+        private final String TAG = "ListLoder (: ";
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Log.i(TAG, "Start loading . . . ");
+        }
+
+        @Override
+        protected ArrayList<Item> doInBackground(File... params) {
+            ArrayList<Item> mItems = new ArrayList<>();
+            if (params[0] != null) {
+                String path = params[0].getAbsolutePath();
+                if (params[0].listFiles() != null) {
+                    MusicFilter filter = new MusicFilter();
+                    File[] listAudioFiles = params[0].listFiles(filter);
+                    if (listAudioFiles != null) {
+                        Set<Map.Entry<File, Integer>> foldersNameSet = filter.getSubFolders().entrySet();
+                        for (Map.Entry<File, Integer> currentFoldersName : foldersNameSet) {
+                            mItems.add(new Item(path,
+                                    currentFoldersName.getKey(),
+                                    currentFoldersName.getValue()
+                            ));
+                        }
+                        ArrayList<File> filesName = filter.getSubFiles();
+                        Collections.sort(filesName);
+                        for (File currentFileName : filesName) {
+                            mItems.add(new Item(path, currentFileName));
+                        }
+                        return mItems;
+                    } else Log.w(TAG, "There are no audio files in '"
+                            + params[0].getName() + "' folder");
+                } else Log.w(TAG, "'" + params[0].getName()
+                        + "' folder is empty");
+            } else Log.w(TAG, "Inner file is null");
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Item> items) {
+            super.onPostExecute(items);
+            Log.i(TAG, " . . . Finish loading!");
+            mItems = items;
+            setNewItems(mItems);
+        }
     }
 }

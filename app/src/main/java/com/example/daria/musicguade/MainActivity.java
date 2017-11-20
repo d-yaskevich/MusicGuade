@@ -18,9 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements OnChangeFragmentStateListener {
+public class MainActivity extends AppCompatActivity
+        implements OnChangeFragmentStateListener {
 
     private final String TAG = "MainActivity " + this.hashCode() + " (: ";
 
@@ -29,10 +29,7 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
     public final static String PATH = "path";
     public final static String ITEM_LIST = "item_list";
 
-    public static final String PATH_FOR_UI = "sdcard";
-    public static String pathMain = "/mnt/sdcard";
-    private String path = pathMain;
-    private ArrayList<Item> mItem = new ArrayList<>();
+    public static String mainPath = "/mnt/sdcard";
 
     public TextView address;
     private Fragment fragment;
@@ -72,9 +69,7 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
         mFragmentManager = getFragmentManager();
         fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
         if (fragment == null) {
-            fragment = createFragmentWithData(mItem);
-            ListLoder loder = new ListLoder((MyListFragment) fragment);
-            loder.execute(new File(path));
+            fragment = createFragmentWithData(mainPath);
             mFragmentManager.beginTransaction()
                     .add(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
                     .commit();
@@ -83,27 +78,23 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
 
     /**
      * Create new fragment and push data to the fragment.
-     * @param item data to send
+     *
+     * @param path
      * @return new object MyListFragment class
      */
-    public MyListFragment createFragmentWithData(ArrayList<Item> item) {
+    public MyListFragment createFragmentWithData(String path) {
         MyListFragment fragment = new MyListFragment();
         Bundle bundle = new Bundle();
         bundle.putString(PATH, path);
-        bundle.putParcelableArrayList(ITEM_LIST, item);
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
     public void onItemSelected(String newPath) {
-        path = newPath;
-        File file = new File(path);
+        File file = new File(newPath);
         if (file.isDirectory()) {
-            mItem = new ArrayList<>();
-            fragment = createFragmentWithData(mItem);
-            ListLoder loder = new ListLoder((MyListFragment) fragment);
-            loder.execute(file);
+            fragment = createFragmentWithData(newPath);
             mFragmentManager.beginTransaction()
                     .replace(R.id.fragment_place, fragment, FRAGMENT_INSTANCE_NAME)
                     .addToBackStack(null)
@@ -115,8 +106,8 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
     }
 
     @Override
-    public void uploadPath(String path) {
-        address.setText(path.replace(pathMain, PATH_FOR_UI));
+    public void uploadPath(String newPath) {
+        address.setText(newPath);
     }
 
     @Override
@@ -139,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
 
     /**
      * Check permission READ_EXTERNAL_STORAGE
+     *
      * @return true if permission granted,
      * false otherwise
      */
@@ -192,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
             if (grantResults.length <= 0) {
                 //If user interaction was interrupted, the permission request is cancelled and you
                 //receive empty arrays.
-                if(fragment != null){
+                if (fragment != null) {
                     mFragmentManager.beginTransaction().remove(fragment);
                 }
                 Log.w(TAG, "User interaction was cancelled.");
@@ -220,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
                                 startActivity(intent);
                             }
                         });
-                if(fragment != null){
+                if (fragment != null) {
                     mFragmentManager.beginTransaction().remove(fragment);
                 }
             }
@@ -231,10 +223,11 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
     /**
      * Build and show AlertDialog with two buttons.
      * Nothing will happen when the negative button is pressed.
+     *
      * @param titleTextStringId string Id for title
-     * @param mainTextStringId string Id for content
-     * @param actionStringId strind Id for positive button
-     * @param listener action when positive button is pressed
+     * @param mainTextStringId  string Id for content
+     * @param actionStringId    strind Id for positive button
+     * @param listener          action when positive button is pressed
      */
     private void showAlertDialog(final int titleTextStringId,
                                  final int mainTextStringId,

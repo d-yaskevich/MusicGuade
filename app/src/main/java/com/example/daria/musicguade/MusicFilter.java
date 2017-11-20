@@ -82,6 +82,8 @@ public class MusicFilter implements FileFilter {
     }
 
     private class MusicFileFilter implements FilenameFilter {
+
+
         @Override
         public boolean accept(File dir, String name) {
             if (isAudioFile(name)) {
