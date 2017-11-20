@@ -15,19 +15,25 @@ public class Item implements Parcelable {
     public static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
     private String name;
-    private String count;
-    private String data;
     private String date;
+    private String data;
+    private String count;
     private String path;
     private int image;
+    private boolean folder = false;
 
     protected Item(Parcel in) {
-        name = in.readString();
-        count = in.readString();
-        data = in.readString();
-        date = in.readString();
-        path = in.readString();
+        String[] s = new String[5];
+        in.readStringArray(s);
+        name = s[0];
+        count = s[1];
+        data = s[2];
+        date = s[3];
+        path = s[4];
         image = in.readInt();
+        boolean[] f = new boolean[1];
+        in.readBooleanArray(f);
+        folder = f[0];
     }
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -42,32 +48,48 @@ public class Item implements Parcelable {
         }
     };
 
-    public Item(String path, File file, int count) {
-        if (file.isDirectory()) {
-            this.count = toObject(count);
-            this.image = R.drawable.ic_folder_black_24px;
-        } else {
-            this.count = null;
-            this.image = R.drawable.ic_music_note_black_24px;
-        }
-        this.name = file.getAbsolutePath().replace(path + File.separator, "");
-        this.data = "";
-        this.date = formatter.format(new Date(file.lastModified()));
-        this.path = file.getAbsolutePath();
-    }
-
+    /**
+     * Use when file isn't folder
+     * @param path parent path
+     * @param file current file for item
+     */
     public Item(String path, File file) {
         if (file.isDirectory()) {
             this.image = R.drawable.ic_folder_black_24px;
-            this.count = "0";
+            this.folder = true;
         } else {
             this.image = R.drawable.ic_music_note_black_24px;
-            this.count = null;
         }
+        this.count = "0";
         this.name = file.getAbsolutePath().replace(path + File.separator, "");
         this.data = toBytes(file.length());
         this.date = formatter.format(new Date(file.lastModified()));
         this.path = file.getAbsolutePath();
+    }
+
+    /**
+     * Use if file is folder
+     * @param path parent path
+     * @param file current folder for item
+     * @param count count input files
+     */
+    public Item(String path, File file, int count) {
+        this(path,file);
+        if (file.isDirectory()) {
+            this.count = toObject(count);
+        }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringArray(new String[] {name,count,data,date,path});
+        dest.writeInt(image);
+        dest.writeBooleanArray(new boolean[]{folder});
     }
 
     public String getName() {
@@ -86,34 +108,21 @@ public class Item implements Parcelable {
         return date;
     }
 
+    public int getImage() {
+        return image;
+    }
+
     public String getPath() {
         return path;
     }
 
     public boolean isFolder() {
-        if (getCount() == null) {
-            return false;
-        } else return true;
+        return folder;
     }
 
     @Override
     public String toString() {
         return name;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeString(count);
-        dest.writeString(data);
-        dest.writeString(date);
-        dest.writeString(path);
-        dest.writeInt(image);
     }
 
     public static String toObject(int length) {
@@ -137,9 +146,5 @@ public class Item implements Parcelable {
             space += " B";
         }
         return space;
-    }
-
-    public int getImage() {
-        return image;
     }
 }

@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements OnChangeFragmentS
      * @param titleTextStringId string Id for title
      * @param mainTextStringId string Id for content
      * @param actionStringId strind Id for positive button
-     * @param listener action when positive button is pressed     *
+     * @param listener action when positive button is pressed
      */
     private void showAlertDialog(final int titleTextStringId,
                                  final int mainTextStringId,
