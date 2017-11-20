@@ -27,9 +27,8 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_CODE_EXTERNAL_STORAGE = 1;
     public final static String FRAGMENT_INSTANCE_NAME = "fragment";
     public final static String PATH = "path";
-    public final static String ITEM_LIST = "item_list";
 
-    public static String mainPath = "/mnt/sdcard";
+    public static String mainPath = "/mnt";
 
     public TextView address;
     private Fragment fragment;

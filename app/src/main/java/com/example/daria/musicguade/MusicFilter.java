@@ -7,12 +7,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
-
-
-/**
- * Created by yakov on 10.11.2017.
- */
-
 public class MusicFilter implements FileFilter {
 
     private final String TAG = "MusicFilter (: ";

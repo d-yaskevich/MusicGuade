@@ -61,7 +61,7 @@ public class Item implements Parcelable {
             this.image = R.drawable.ic_music_note_black_24px;
         }
         this.count = "0";
-        this.name = file.getAbsolutePath().replace(path + File.separator, "");
+        this.name = file.getAbsolutePath().replace(path+File.separator, "");
         this.data = toBytes(file.length());
         this.date = formatter.format(new Date(file.lastModified()));
         this.path = file.getAbsolutePath();

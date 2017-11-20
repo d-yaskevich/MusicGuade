@@ -54,7 +54,7 @@ public class MyListFragment extends ListFragment {
             }
         }
         if (path != null) {
-            mFragmentStateListener.uploadPath(path + File.separator);
+            mFragmentStateListener.uploadPath(path);
         }
         return view;
     }
@@ -121,17 +121,12 @@ public class MyListFragment extends ListFragment {
      * @param items new data of list
      */
     public void setNewItems(ArrayList<Item> items) {
-        if (items != null) {
-            adapter = new MyListAdapter(getActivity(), R.layout.item_fragment, items);
-            setListAdapter(adapter);
-        } else {
+        if (items == null) {
             items = new ArrayList<>();
-            items.add(new Item("/mnt", new File(getPath()), 0));
+            items.add(new Item(path, new File(path), 0));
         }
-    }
-
-    public String getPath() {
-        return path;
+        adapter = new MyListAdapter(getActivity(), R.layout.item_fragment, items);
+        setListAdapter(adapter);
     }
 
     public class ListLoder extends AsyncTask<File, Integer, ArrayList<Item>> {
