@@ -55,7 +55,7 @@ public class MusicFilter implements FileFilter {
     /**
      * Check if the file is an audio file by file extension.
      *
-     * @param name is checked file
+     * @param name is checked file name
      * @return true if the file is an audio file, otherwise false.
      */
     public static boolean isAudioFile(String name) {

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -28,7 +29,7 @@ public class MainActivity extends AppCompatActivity
     public final static String FRAGMENT_INSTANCE_NAME = "fragment";
     public final static String PATH = "path";
 
-    public static String mainPath = "/mnt";
+    public static String mainPath = Environment.getExternalStorageDirectory().toString();
 
     public TextView address;
     private Fragment fragment;
