@@ -7,7 +7,10 @@ import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
@@ -19,6 +22,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+
+import static com.example.daria.musicguade.FileSystemContract.FilesTable;
+import static com.example.daria.musicguade.FileSystemContract.ListTable;
+import static com.example.daria.musicguade.FileSystemDBManager.emptyDBTables;
+import static com.example.daria.musicguade.FileSystemDBManager.queryCount;
 
 public class MainActivity extends AppCompatActivity
         implements OnChangeFragmentStateListener {
@@ -41,6 +49,7 @@ public class MainActivity extends AppCompatActivity
         Log.i(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
         address = (TextView) findViewById(R.id.address_view);
+        address.setText(mainPath);
     }
 
     @Override
@@ -48,7 +57,7 @@ public class MainActivity extends AppCompatActivity
         Log.i(TAG, "onStart()");
         super.onStart();
         if (checkPermissions()) {
-            createUI();
+            new FileSystemDBAgent().execute();
         } else {
             requestPermissions();
         }
@@ -128,6 +137,43 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
     }
 
+    public class FileSystemDBAgent extends AsyncTask<Void, Void, Void> {
+
+        private final String TAG = "FileSystemDBAgent (: ";
+
+        private SQLiteDatabase db;
+        private FileSystemDBHelper mDBHelper;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mDBHelper = new FileSystemDBHelper(getApplicationContext());
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            createUI();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.d(TAG, "new " + Thread.currentThread().getId() + " thread");
+            try {
+                db = mDBHelper.getWritableDatabase();
+                if (emptyDBTables(db)) {
+                    mDBHelper.onRecreate(db);
+                }else mDBHelper.onUpload(db);
+                Log.d(TAG, "Files - " + queryCount(db, FilesTable.TABLE_NAME) + " rows, List - "
+                        + queryCount(db, ListTable.TABLE_NAME) + " rows");
+            } catch (SQLiteException ex) {
+                Log.w(TAG, "just read!");
+                db = mDBHelper.getReadableDatabase();
+            }
+            return null;
+        }
+    }
+
     /**
      * Check permission READ_EXTERNAL_STORAGE
      *
@@ -190,7 +236,7 @@ public class MainActivity extends AppCompatActivity
                 Log.w(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted.
-                createUI();
+                new FileSystemDBAgent().execute();
             } else {
                 //Permission denied.
                 //Notify the user via a AlertDialog that they have rejected a core permission for the
@@ -245,4 +291,6 @@ public class MainActivity extends AppCompatActivity
                 });
         ad.setCancelable(false).show();
     }
+
+
 }

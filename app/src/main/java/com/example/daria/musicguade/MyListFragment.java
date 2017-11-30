@@ -2,7 +2,9 @@ package com.example.daria.musicguade;
 
 import android.app.ListFragment;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -13,10 +15,10 @@ import android.widget.ListView;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
+import static com.example.daria.musicguade.FileSystemContract.FilesTable;
+import static com.example.daria.musicguade.FileSystemContract.ListTable;
+import static com.example.daria.musicguade.FileSystemDBManager.queryCount;
 import static com.example.daria.musicguade.MainActivity.PATH;
 
 public class MyListFragment extends ListFragment {
@@ -29,6 +31,9 @@ public class MyListFragment extends ListFragment {
     private String path;
 
     OnChangeFragmentStateListener mFragmentStateListener;
+
+    FileSystemDBHelper mDbHelper = null;
+    SQLiteDatabase db = null;
 
     public MyListFragment() {
         this.setRetainInstance(true);
@@ -48,9 +53,11 @@ public class MyListFragment extends ListFragment {
             view = inflater.inflate(R.layout.list_fragment, null);
             Bundle bundle = getArguments();
             if (bundle != null) {
-                mItems = new ArrayList<>();
                 path = bundle.getString(PATH);
-                new ListLoder().execute(new File(path));
+                mItems = new ArrayList<>();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    new FileSystemDBAgent().execute();
+                }
             }
         }
         if (path != null) {
@@ -121,6 +128,7 @@ public class MyListFragment extends ListFragment {
      * @param items new data of list
      */
     public void setNewItems(ArrayList<Item> items) {
+        mItems = items;
         if (items == null) {
             items = new ArrayList<>();
             items.add(new Item(path, new File(path), 0));
@@ -129,52 +137,39 @@ public class MyListFragment extends ListFragment {
         setListAdapter(adapter);
     }
 
-    public class ListLoder extends AsyncTask<File, Integer, ArrayList<Item>> {
+    public class FileSystemDBAgent extends AsyncTask<Void, Void, ArrayList<Item>> {
 
-        private final String TAG = "ListLoder (: ";
+        private final String TAG = "FileSystemDBAgent (: ";
+
+        private SQLiteDatabase db;
+        private FileSystemDBHelper mDBHelper;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Log.i(TAG, "Start loading . . . ");
-        }
-
-        @Override
-        protected ArrayList<Item> doInBackground(File... params) {
-            ArrayList<Item> mItems = new ArrayList<>();
-            if (params[0] != null) {
-                String path = params[0].getAbsolutePath();
-                if (params[0].listFiles() != null) {
-                    MusicFilter filter = new MusicFilter();
-                    File[] listAudioFiles = params[0].listFiles(filter);
-                    if (listAudioFiles != null) {
-                        Set<Map.Entry<File, Integer>> foldersNameSet = filter.getSubFolders().entrySet();
-                        for (Map.Entry<File, Integer> currentFoldersName : foldersNameSet) {
-                            mItems.add(new Item(path,
-                                    currentFoldersName.getKey(),
-                                    currentFoldersName.getValue()
-                            ));
-                        }
-                        ArrayList<File> filesName = filter.getSubFiles();
-                        Collections.sort(filesName);
-                        for (File currentFileName : filesName) {
-                            mItems.add(new Item(path, currentFileName));
-                        }
-                        return mItems;
-                    } else Log.w(TAG, "There are no audio files in '"
-                            + params[0].getName() + "' folder");
-                } else Log.w(TAG, "'" + params[0].getName()
-                        + "' folder is empty");
-            } else Log.w(TAG, "Inner file is null");
-            return null;
+            mDBHelper = new FileSystemDBHelper(getContext());
         }
 
         @Override
         protected void onPostExecute(ArrayList<Item> items) {
             super.onPostExecute(items);
-            Log.i(TAG, " . . . Finish loading!");
-            mItems = items;
-            setNewItems(mItems);
+            if (items != null) {
+                setNewItems(items);
+            }
+        }
+
+        @Override
+        protected ArrayList<Item> doInBackground(Void... params) {
+            Log.d(TAG, "new " + Thread.currentThread().getId() + " thread");
+            db = mDBHelper.getReadableDatabase();
+            return getItemsListFromDB();
+        }
+
+        private ArrayList<Item> getItemsListFromDB() {
+            ArrayList<Item> items = new ArrayList<>();
+            Log.d(TAG, "Files - " + queryCount(db, FilesTable.TABLE_NAME) + " rows, List - "
+                    + queryCount(db, ListTable.TABLE_NAME) + " rows");
+            return items;
         }
     }
 }

@@ -36,10 +36,11 @@ public final class FileSystemContract {
 
         protected static final String SQL_CREATE_TABLE_LIST =
                 "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
-                        ListTable.COLUMN_FILE_ID + INTEGER_TYPE + " PRIMARY KEY" + NOT_NULL + COMMA_SEP +
-                        ListTable.COLUMN_KID_FILE_ID + INTEGER_TYPE + " PRIMARY KEY" + NOT_NULL + COMMA_SEP +
+                        ListTable.COLUMN_FILE_ID + INTEGER_TYPE + NOT_NULL + COMMA_SEP +
+                        ListTable.COLUMN_KID_FILE_ID + INTEGER_TYPE + NOT_NULL + COMMA_SEP +
+                        "PRIMARY KEY (" + ListTable.COLUMN_FILE_ID + COMMA_SEP + ListTable.COLUMN_KID_FILE_ID + ")" + COMMA_SEP +
                         "FOREIGN KEY (" + COLUMN_FILE_ID + ") REFERENCES " + FilesTable.TABLE_NAME + "(" + FilesTable._ID + ")" + COMMA_SEP +
-                        "FOREIGN KEY (" + COLUMN_KID_FILE_ID + ") REFERENCES " + FilesTable.TABLE_NAME + "(" + FilesTable._ID + ");";
+                        "FOREIGN KEY (" + COLUMN_KID_FILE_ID + ") REFERENCES " + FilesTable.TABLE_NAME + "(" + FilesTable._ID + "));";
 
         protected static final String SQL_DELETE_TABLE_LIST =
                 "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
