@@ -14,7 +14,7 @@ public class FileSystemDBHelper extends SQLiteOpenHelper {
     private final String TAG = "FileSystemDBHelper (: ";
 
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "FileSystem.db";
+    public static final String DATABASE_NAME = "AudioFileSystem.db";
 
     public FileSystemDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -22,15 +22,22 @@ public class FileSystemDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d(TAG,Thread.currentThread().getId()+" thread DB onCreate() ");
+        Log.i(TAG,Thread.currentThread().getId()+" - onCreate() DB");
         db.execSQL(FilesTable.SQL_CREATE_TABLE_FILES);
         db.execSQL(ListTable.SQL_CREATE_TABLE_LIST);
         onLoad(db);
     }
 
+    public void onRecreate(SQLiteDatabase db){
+        Log.i(TAG,Thread.currentThread().getId()+" - onRecreate() DB");
+        db.execSQL(FilesTable.SQL_DELETE_TABLE_FILES);
+        db.execSQL(ListTable.SQL_DELETE_TABLE_LIST);
+        onCreate(db);
+    }
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d(TAG,Thread.currentThread().getId()+" thread DB onUpgrade() ");
+        Log.i(TAG,Thread.currentThread().getId()+" -  onUpgrade() DB");
         db.execSQL(FilesTable.SQL_DELETE_TABLE_FILES);
         db.execSQL(ListTable.SQL_DELETE_TABLE_LIST);
         onCreate(db);
@@ -38,23 +45,18 @@ public class FileSystemDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onOpen(SQLiteDatabase db) {
-        Log.d(TAG,Thread.currentThread().getId()+" thread DB onOpen() ");
+        Log.i(TAG,Thread.currentThread().getId()+" - onOpen() DB");
         super.onOpen(db);
     }
 
     public void onLoad(SQLiteDatabase db){
+        Log.i(TAG,Thread.currentThread().getId()+" - onLoad() DB");
         new FileSystemDBLoder(db).onLoad(mainPath);
     }
 
-    public void onRecreate(SQLiteDatabase db){
-        Log.d(TAG,Thread.currentThread().getId()+" thread DB onRecreate() ");
-        db.execSQL(FilesTable.SQL_DELETE_TABLE_FILES);
-        db.execSQL(ListTable.SQL_DELETE_TABLE_LIST);
-        onCreate(db);
-    }
 
     public void onUpload(SQLiteDatabase db){
-        Log.d(TAG,Thread.currentThread().getId()+" thread DB onUpload() ");
+        Log.i(TAG,Thread.currentThread().getId()+" - onUpload() DB");
         new FileSystemDBLoder(db).onUpload(mainPath);
     }
 }

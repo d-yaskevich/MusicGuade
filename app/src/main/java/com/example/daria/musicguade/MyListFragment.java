@@ -15,10 +15,10 @@ import android.widget.ListView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
-import static com.example.daria.musicguade.FileSystemContract.FilesTable;
-import static com.example.daria.musicguade.FileSystemContract.ListTable;
-import static com.example.daria.musicguade.FileSystemDBManager.queryCount;
+import static com.example.daria.musicguade.FileSystemDBManager.queryForList;
 import static com.example.daria.musicguade.MainActivity.PATH;
 
 public class MyListFragment extends ListFragment {
@@ -60,9 +60,6 @@ public class MyListFragment extends ListFragment {
                 }
             }
         }
-        if (path != null) {
-            mFragmentStateListener.uploadPath(path);
-        }
         return view;
     }
 
@@ -77,6 +74,9 @@ public class MyListFragment extends ListFragment {
     public void onStart() {
         Log.i(TAG, "onStart()");
         super.onStart();
+        if (path != null) {
+            mFragmentStateListener.uploadPath(path);
+        }
     }
 
     @Override
@@ -129,11 +129,7 @@ public class MyListFragment extends ListFragment {
      */
     public void setNewItems(ArrayList<Item> items) {
         mItems = items;
-        if (items == null) {
-            items = new ArrayList<>();
-            items.add(new Item(path, new File(path), 0));
-        }
-        adapter = new MyListAdapter(getActivity(), R.layout.item_fragment, items);
+        adapter = new MyListAdapter(getActivity(), R.layout.item_fragment, mItems);
         setListAdapter(adapter);
     }
 
@@ -160,15 +156,32 @@ public class MyListFragment extends ListFragment {
 
         @Override
         protected ArrayList<Item> doInBackground(Void... params) {
-            Log.d(TAG, "new " + Thread.currentThread().getId() + " thread");
             db = mDBHelper.getReadableDatabase();
             return getItemsListFromDB();
         }
 
         private ArrayList<Item> getItemsListFromDB() {
             ArrayList<Item> items = new ArrayList<>();
-            Log.d(TAG, "Files - " + queryCount(db, FilesTable.TABLE_NAME) + " rows, List - "
-                    + queryCount(db, ListTable.TABLE_NAME) + " rows");
+            Map<String, Integer> kidsPath = queryForList(db, path);
+            if (kidsPath != null) {
+                ArrayList<String> files = new ArrayList<>();
+                Set<Map.Entry<String, Integer>> kidsPathSet = kidsPath.entrySet();
+                for (Map.Entry<String, Integer> mKidsPathSet : kidsPathSet) {
+                    if (mKidsPathSet.getValue() != 0) {
+                        items.add(new Item(path,
+                                new File(mKidsPathSet.getKey()),
+                                mKidsPathSet.getValue())
+                        );
+                    }else{
+                        files.add(mKidsPathSet.getKey());
+                    }
+                }
+                for (String file: files) {
+                    items.add(new Item(path,new File(file)));
+                }
+            }
+            if (items == null)
+                items.add(new Item(path, new File(path), 0));
             return items;
         }
     }

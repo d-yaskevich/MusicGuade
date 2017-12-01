@@ -12,7 +12,6 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -37,7 +36,7 @@ public class MainActivity extends AppCompatActivity
     public final static String FRAGMENT_INSTANCE_NAME = "fragment";
     public final static String PATH = "path";
 
-    public static String mainPath = Environment.getExternalStorageDirectory().toString();
+    public static String mainPath = "/mnt/sdcard";
 
     public TextView address;
     private Fragment fragment;
@@ -49,7 +48,6 @@ public class MainActivity extends AppCompatActivity
         Log.i(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
         address = (TextView) findViewById(R.id.address_view);
-        address.setText(mainPath);
     }
 
     @Override
@@ -148,6 +146,7 @@ public class MainActivity extends AppCompatActivity
         protected void onPreExecute() {
             super.onPreExecute();
             mDBHelper = new FileSystemDBHelper(getApplicationContext());
+            address.setText("Looking for the best music files on your phone . . .");
         }
 
         @Override
@@ -158,14 +157,15 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected Void doInBackground(Void... params) {
-            Log.d(TAG, "new " + Thread.currentThread().getId() + " thread");
             try {
                 db = mDBHelper.getWritableDatabase();
                 if (emptyDBTables(db)) {
                     mDBHelper.onRecreate(db);
-                }else mDBHelper.onUpload(db);
-                Log.d(TAG, "Files - " + queryCount(db, FilesTable.TABLE_NAME) + " rows, List - "
-                        + queryCount(db, ListTable.TABLE_NAME) + " rows");
+                } else mDBHelper.onUpload(db);
+                int files = queryCount(db, FilesTable.TABLE_NAME, FilesTable._ID, null, null);
+                int list = queryCount(db, ListTable.TABLE_NAME, ListTable.COLUMN_FILE_ID, null, null);
+                Log.d(TAG, "Files - " + files + " rows, List - "
+                        + list + " rows");
             } catch (SQLiteException ex) {
                 Log.w(TAG, "just read!");
                 db = mDBHelper.getReadableDatabase();

@@ -26,7 +26,8 @@ public class FileSystemDBLoder {
             AudioFilter filter = new AudioFilter();
             File[] list = file.listFiles(filter);
             if (list != null && list.length != 0) {
-                long id = insert(db, file.getAbsolutePath(), 1);
+                long id = insert(db, path, 1);
+                Log.d(TAG,"file path: "+path);
                 for (Long i : filter.IDs) {
                     insert(db, id, i);
                 }
@@ -61,17 +62,15 @@ public class FileSystemDBLoder {
                 if (list != null && list.length != 0) {
                     long id = insert(db, file.getAbsolutePath(), 1);
                     if (list.length == 1 && list[0].isDirectory()) {
-                        for (Long i : filter.IDs) {
-                            IDs.add(i);
-                        }
+                        IDs.addAll(filter.IDs);
                     } else {
                         for (Long i : filter.IDs) {
                             insert(db, id, i);
                         }
                         IDs.add(id);
                     }
+                    return true;
                 }
-                return true;
             } else {
                 if (isAudioFile(file.getName())) {
                     long id = insert(db, file.getAbsolutePath(), 0);
