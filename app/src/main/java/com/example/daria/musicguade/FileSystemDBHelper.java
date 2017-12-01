@@ -7,6 +7,8 @@ import android.util.Log;
 
 import static com.example.daria.musicguade.FileSystemContract.FilesTable;
 import static com.example.daria.musicguade.FileSystemContract.ListTable;
+import static com.example.daria.musicguade.FileSystemDBManager.getPathFromDBFilesTable;
+import static com.example.daria.musicguade.FileSystemDBManager.queryCount;
 import static com.example.daria.musicguade.MainActivity.mainPath;
 
 public class FileSystemDBHelper extends SQLiteOpenHelper {
@@ -57,6 +59,10 @@ public class FileSystemDBHelper extends SQLiteOpenHelper {
 
     public void onUpload(SQLiteDatabase db){
         Log.i(TAG,Thread.currentThread().getId()+" - onUpload() DB");
+        int files = queryCount(db, FilesTable.TABLE_NAME, FilesTable._ID, null, null);
+        if(getPathFromDBFilesTable(db,Long.valueOf(files))==mainPath){
+            onRecreate(db);
+        }
         new FileSystemDBLoder(db).onUpload(mainPath);
     }
 }
