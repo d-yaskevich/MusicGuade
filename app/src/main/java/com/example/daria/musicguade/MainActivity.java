@@ -17,6 +17,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity
 
     public static String mainPath = "/mnt/sdcard";
 
+    public ProgressBar mProgressBar;
     public TextView address;
     private Fragment fragment;
     private FragmentManager mFragmentManager;
@@ -48,6 +51,8 @@ public class MainActivity extends AppCompatActivity
         Log.i(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
         address = (TextView) findViewById(R.id.address_view);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mProgressBar.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -138,7 +143,6 @@ public class MainActivity extends AppCompatActivity
     public class FileSystemDBAgent extends AsyncTask<Void, Void, Void> {
 
         private final String TAG = "FileSystemDBAgent (: ";
-
         private SQLiteDatabase db;
         private FileSystemDBHelper mDBHelper;
 
@@ -146,12 +150,14 @@ public class MainActivity extends AppCompatActivity
         protected void onPreExecute() {
             super.onPreExecute();
             mDBHelper = new FileSystemDBHelper(getApplicationContext());
-            address.setText("Looking for the best music files on your phone . . .");
+            address.setText(R.string.text_looking);
+            mProgressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            mProgressBar.setVisibility(View.INVISIBLE);
             createUI();
         }
 
@@ -208,7 +214,7 @@ public class MainActivity extends AppCompatActivity
             // but didn't check the "Don't ask again" checkbox.
             showAlertDialog(R.string.permission_required,
                     R.string.permission_message_one,
-                    R.string.settings,
+                    R.string.ok,
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int arg1) {
                             // Request permission

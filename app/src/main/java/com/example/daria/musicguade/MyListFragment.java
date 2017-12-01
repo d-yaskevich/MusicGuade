@@ -30,10 +30,7 @@ public class MyListFragment extends ListFragment {
     private View view = null;
     private String path;
 
-    OnChangeFragmentStateListener mFragmentStateListener;
-
-    FileSystemDBHelper mDbHelper = null;
-    SQLiteDatabase db = null;
+    private OnChangeFragmentStateListener mFragmentStateListener;
 
     public MyListFragment() {
         this.setRetainInstance(true);
@@ -172,12 +169,12 @@ public class MyListFragment extends ListFragment {
                                 new File(mKidsPathSet.getKey()),
                                 mKidsPathSet.getValue())
                         );
-                    }else{
+                    } else {
                         files.add(mKidsPathSet.getKey());
                     }
                 }
-                for (String file: files) {
-                    items.add(new Item(path,new File(file)));
+                for (String file : files) {
+                    items.add(new Item(path, new File(file)));
                 }
             }
             if (items == null)

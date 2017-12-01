@@ -175,31 +175,47 @@ public abstract class FileSystemDBManager {
         return queryWhereEquality(db, FilesTable.TABLE_NAME, FilesTable._ID, ID);
     }
 
+    /**
+     * Getting data from DB to fill list.
+     *
+     * @param db DB for getting
+     * @param path File path for getting
+     * @return Map<String, Integer> where key:String - kid path, value:Integer - count of kid's kids
+     */
     public static Map<String, Integer> queryForList(SQLiteDatabase db, String path) {
-        long ID = getIDFromDBFilesTable(db, path);
-        if (ID == -1) {
+        //get ID current path
+        Long ID = getIDFromDBFilesTable(db, path);
+        if (ID == null) {
             Log.w(TAG, "Folder(" + path + ") don't find in " + FilesTable.TABLE_NAME + " table!");
             return null;
         }
         long kidID;
         Map<String, Integer> kidsList = new TreeMap<>();
+        //get kids ID for current path
         Cursor cursor = queryWhereEquality(db, ListTable.TABLE_NAME, ListTable.COLUMN_FILE_ID, ID);
         if (cursor.moveToFirst()) {
             do {
+                //get current kid ID columns value
                 kidID = cursor.getLong(cursor.getColumnIndex(ListTable.COLUMN_KID_FILE_ID));
                 String kidPATH;
                 int kidDIR;
+                //get current kid PATH and DIRECTORY columns value
                 Cursor kidCursor = getCursorFromDBFilesTable(db, kidID);
                 if (kidCursor.moveToFirst()) {
                     kidPATH = getPathFromDBFilesTable(kidCursor);
                     kidDIR = getDirFromDBFilesTable(kidCursor);
+                    //check is directory or not
                     int count = 0;
                     if (kidDIR == 1) {
-                        count = queryCount(db, ListTable.TABLE_NAME, ListTable.COLUMN_KID_FILE_ID, ListTable.COLUMN_FILE_ID, kidID);
+                        //get count current kid's kids if directory
+                        count = queryCount(db, ListTable.TABLE_NAME, ListTable.COLUMN_KID_FILE_ID,
+                                ListTable.COLUMN_FILE_ID, kidID);
                     }
+                    //add to result map
                     kidsList.put(kidPATH, count);
                 } else {
-                    Log.w(TAG, "kidID=" + kidID + " in folder(" + path + ") don't include in " + FilesTable.TABLE_NAME + " table!");
+                    Log.w(TAG, "kidID=" + kidID + " in folder(" + path + ")"+
+                            " don't include in " + FilesTable.TABLE_NAME + " table!");
                     return null;
                 }
             } while (cursor.moveToNext());
