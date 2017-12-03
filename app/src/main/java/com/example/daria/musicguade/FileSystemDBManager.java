@@ -19,8 +19,8 @@ public abstract class FileSystemDBManager {
      * Get ContentValues for FilesTable
      *
      * @param path Path for COLUMN_PATH
-     * @param dir Integer value for COLUMN_IS_DIRECTORY
-     *            0(false) if file is not a directory, otherwise 1(true)
+     * @param dir  Integer value for COLUMN_IS_DIRECTORY
+     *             0(false) if file is not a directory, otherwise 1(true)
      * @return ContentValues for adding to FilesTable
      */
     private static ContentValues toValues(String path, Integer dir) {
@@ -34,7 +34,7 @@ public abstract class FileSystemDBManager {
      * Get ContentValues for ListTable
      *
      * @param file File ID for COLUMN_FILE_ID
-     * @param kid Kid file ID for COLUMN_KID_FILE_ID
+     * @param kid  Kid file ID for COLUMN_KID_FILE_ID
      * @return ContentValues for adding to ListTable
      */
     private static ContentValues toValues(Long file, Long kid) {
@@ -47,10 +47,10 @@ public abstract class FileSystemDBManager {
     /**
      * Insert data to DB FilesTable
      *
-     * @param db DB for insert to FilesTable
+     * @param db   DB for insert to FilesTable
      * @param path File path for insert to COLUMN_PATH
-     * @param dir Integer value for COLUMN_IS_DIRECTORY
-     *            0(false) if file is not a directory, otherwise 1(true)
+     * @param dir  Integer value for COLUMN_IS_DIRECTORY
+     *             0(false) if file is not a directory, otherwise 1(true)
      * @return ID this new row in DB
      */
     public static Long insert(SQLiteDatabase db, String path, Integer dir) {
@@ -59,9 +59,10 @@ public abstract class FileSystemDBManager {
 
     /**
      * Insert data to DB ListTable
-     * @param db DB for insert to FilesTable
+     *
+     * @param db   DB for insert to FilesTable
      * @param file File ID for insert to COLUMN_FILE_ID
-     * @param kid Kid file ID for insert to COLUMN_KID_FILE_ID
+     * @param kid  Kid file ID for insert to COLUMN_KID_FILE_ID
      * @return ID this new row in DB
      */
     public static Long insert(SQLiteDatabase db, Long file, Long kid) {
@@ -209,7 +210,7 @@ public abstract class FileSystemDBManager {
     /**
      * Getting data from DB to fill list.
      *
-     * @param db DB for getting
+     * @param db   DB for getting
      * @param path File path for getting
      * @return Map<String, Integer> where key:String - kid path, value:Integer - count of kid's kids
      */
@@ -245,7 +246,7 @@ public abstract class FileSystemDBManager {
                     //add to result map
                     kidsList.put(kidPATH, count);
                 } else {
-                    Log.w(TAG, "kidID=" + kidID + " in folder(" + path + ")"+
+                    Log.w(TAG, "kidID=" + kidID + " in folder(" + path + ")" +
                             " don't include in " + FilesTable.TABLE_NAME + " table!");
                     return null;
                 }

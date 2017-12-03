@@ -62,10 +62,10 @@ public class FileSystemDBHelper extends SQLiteOpenHelper {
     public void onUpload(SQLiteDatabase db) {
         Log.i(TAG, Thread.currentThread().getId() + " - onUpload() DB");
         //check if root path is exist in DB
-        Cursor cursor = queryWhereEquality(db,FilesTable.TABLE_NAME,FilesTable.COLUMN_PATH,rootPath);
-        if(cursor.moveToFirst()){
+        Cursor cursor = queryWhereEquality(db, FilesTable.TABLE_NAME, FilesTable.COLUMN_PATH, rootPath);
+        if (cursor.moveToFirst()) {
             new FileSystemDBLoder(db).onUpload();
-        }else {
+        } else {
             onRecreate(db);
         }
     }

@@ -46,7 +46,7 @@ public class FileSystemDBLoder {
 
     /**
      * Upload all data in AudioFileSystem DB.
-     * This method just delete DB info if file from DB is not exists in files system
+     * This method just delete DB info if file from DB is not exists in files system.
      */
     public void onUpload() {
         Log.d(TAG, Thread.currentThread().getId() + " thread ... Start upload to DB");

@@ -4,7 +4,6 @@ import android.app.ListFragment;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -31,6 +30,7 @@ public class MyListFragment extends ListFragment {
     private String path;
 
     private OnChangeFragmentStateListener mFragmentStateListener;
+    public FileSystemDBAgent mFileSystemDBAgent;
 
     public MyListFragment() {
         this.setRetainInstance(true);
@@ -41,6 +41,7 @@ public class MyListFragment extends ListFragment {
         super.onAttach(context);
         Log.i(TAG, "onAttach()");
         mFragmentStateListener = (OnChangeFragmentStateListener) context;
+        mFileSystemDBAgent = new FileSystemDBAgent();
     }
 
     @Override
@@ -52,11 +53,9 @@ public class MyListFragment extends ListFragment {
             if (bundle != null) {
                 path = bundle.getString(PATH);
                 mItems = new ArrayList<>();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    new FileSystemDBAgent().execute();
-                }
             }
         }
+        new FileSystemDBAgent().execute();
         return view;
     }
 
@@ -71,15 +70,15 @@ public class MyListFragment extends ListFragment {
     public void onStart() {
         Log.i(TAG, "onStart()");
         super.onStart();
-        if (path != null) {
-            mFragmentStateListener.uploadPath(path);
-        }
     }
 
     @Override
     public void onResume() {
         Log.i(TAG, "onResume()");
         super.onResume();
+        if (path != null) {
+            mFragmentStateListener.uploadPath(path);
+        }
     }
 
     @Override
@@ -140,7 +139,7 @@ public class MyListFragment extends ListFragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mDBHelper = new FileSystemDBHelper(getContext(),path);
+            mDBHelper = new FileSystemDBHelper(getContext(), path);
         }
 
         @Override
@@ -154,10 +153,10 @@ public class MyListFragment extends ListFragment {
         @Override
         protected ArrayList<Item> doInBackground(Void... params) {
             db = mDBHelper.getReadableDatabase();
-            return getItemsListFromDB();
+            return getItemsListFromDB(db);
         }
 
-        private ArrayList<Item> getItemsListFromDB() {
+        public ArrayList<Item> getItemsListFromDB(SQLiteDatabase db) {
             ArrayList<Item> items = new ArrayList<>();
             Map<String, Integer> kidsPath = queryForList(db, path);
             if (kidsPath != null) {

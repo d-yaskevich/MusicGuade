@@ -2,7 +2,6 @@ package com.example.daria.musicguade;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,14 +14,19 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import static com.example.daria.musicguade.FileSystemContract.FilesTable;
 import static com.example.daria.musicguade.FileSystemContract.ListTable;
@@ -38,12 +42,15 @@ public class MainActivity extends AppCompatActivity
     public final static String FRAGMENT_INSTANCE_NAME = "fragment";
     public final static String PATH = "path";
 
-    public String mainPath = "/mnt/sdcard";
 
+    public String mainPath = "/mnt";
+
+    public ActionBar mActionBar;
     public ProgressBar mProgressBar;
     public TextView address;
-    private Fragment fragment;
+    private MyListFragment fragment;
     private FragmentManager mFragmentManager;
+    private FileSystemDBAgent mFileSystemDBAgent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +60,8 @@ public class MainActivity extends AppCompatActivity
         address = (TextView) findViewById(R.id.address_view);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mProgressBar.setVisibility(View.INVISIBLE);
+        mActionBar = this.getSupportActionBar();
+        mFileSystemDBAgent = new FileSystemDBAgent();
     }
 
     @Override
@@ -60,7 +69,7 @@ public class MainActivity extends AppCompatActivity
         Log.i(TAG, "onStart()");
         super.onStart();
         if (checkPermissions()) {
-            new FileSystemDBAgent().execute();
+            mFileSystemDBAgent.execute();
         } else {
             requestPermissions();
         }
@@ -75,11 +84,11 @@ public class MainActivity extends AppCompatActivity
     /**
      * Create UI as a fragment.
      * If the old fragment does not found:
-     * creates a new one with create new data for it.
+     * creates a new one with create new data(mainPath) for it.
      */
     private void createUI() {
         mFragmentManager = getFragmentManager();
-        fragment = mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
+        fragment =(MyListFragment) mFragmentManager.findFragmentByTag(FRAGMENT_INSTANCE_NAME);
         if (fragment == null) {
             fragment = createFragmentWithData(mainPath);
             mFragmentManager.beginTransaction()
@@ -91,7 +100,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Create new fragment and push data to the fragment.
      *
-     * @param path
+     * @param path Path for push
      * @return new object MyListFragment class
      */
     public MyListFragment createFragmentWithData(String path) {
@@ -112,7 +121,7 @@ public class MainActivity extends AppCompatActivity
                     .addToBackStack(null)
                     .commit();
         } else {
-            Toast.makeText(this, "Can not open this file :(", Toast.LENGTH_SHORT)
+            Toast.makeText(this, "Can not open this file!", Toast.LENGTH_SHORT)
                     .show();
         }
     }
@@ -140,7 +149,26 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
     }
 
-    public class FileSystemDBAgent extends AsyncTask<Void, Void, Void> {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.refresh:
+                new UploadFileSystemDBAgent().execute();
+                break;
+        }
+        return true;
+    }
+
+    public class FileSystemDBAgent extends AsyncTask<Integer, Void, Void> {
 
         private final String TAG = "FileSystemDBAgent (: ";
         private SQLiteDatabase db;
@@ -149,8 +177,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mDBHelper = new FileSystemDBHelper(getApplicationContext(),mainPath);
-            address.setText(R.string.text_looking);
+            mDBHelper = new FileSystemDBHelper(getApplicationContext(), mainPath);
             mProgressBar.setVisibility(View.VISIBLE);
         }
 
@@ -162,12 +189,14 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(Integer... params) {
             try {
                 db = mDBHelper.getWritableDatabase();
                 if (emptyDBTables(db)) {
                     mDBHelper.onRecreate(db);
-                } else mDBHelper.onUpload(db);
+                } else {
+                    mDBHelper.onUpload(db);
+                }
                 int files = queryCount(db, FilesTable.TABLE_NAME, FilesTable._ID, null, null);
                 int list = queryCount(db, ListTable.TABLE_NAME, ListTable.COLUMN_FILE_ID, null, null);
                 Log.d(TAG, "Files - " + files + " rows, List - "
@@ -177,6 +206,42 @@ public class MainActivity extends AppCompatActivity
                 db = mDBHelper.getReadableDatabase();
             }
             return null;
+        }
+    }
+
+    public class UploadFileSystemDBAgent extends AsyncTask<Void, Void, ArrayList<Item>> {
+
+        private final String TAG = "UploadFSDBAgent (: ";
+        private SQLiteDatabase db;
+        private FileSystemDBHelper mDBHelper;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mDBHelper = new FileSystemDBHelper(getApplicationContext(), mainPath);
+            fragment.setNewItems(new ArrayList<Item>());
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Item> items) {
+            super.onPostExecute(items);
+            fragment.setNewItems(items);
+        }
+
+        @Override
+        protected ArrayList<Item> doInBackground(Void... params) {
+            try {
+                db = mDBHelper.getWritableDatabase();
+                mDBHelper.onRecreate(db);
+                int files = queryCount(db, FilesTable.TABLE_NAME, FilesTable._ID, null, null);
+                int list = queryCount(db, ListTable.TABLE_NAME, ListTable.COLUMN_FILE_ID, null, null);
+                Log.d(TAG, "Files - " + files + " rows, List - "
+                        + list + " rows");
+            } catch (SQLiteException ex) {
+                Log.w(TAG, "just read!");
+                db = mDBHelper.getReadableDatabase();
+            }
+            return fragment.mFileSystemDBAgent.getItemsListFromDB(db);
         }
     }
 
@@ -242,7 +307,7 @@ public class MainActivity extends AppCompatActivity
                 Log.w(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted.
-                new FileSystemDBAgent().execute();
+                mFileSystemDBAgent.execute();
             } else {
                 //Permission denied.
                 //Notify the user via a AlertDialog that they have rejected a core permission for the
