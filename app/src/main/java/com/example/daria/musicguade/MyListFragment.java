@@ -140,7 +140,7 @@ public class MyListFragment extends ListFragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mDBHelper = new FileSystemDBHelper(getContext());
+            mDBHelper = new FileSystemDBHelper(getContext(),path);
         }
 
         @Override

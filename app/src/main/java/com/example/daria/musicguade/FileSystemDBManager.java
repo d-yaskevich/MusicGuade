@@ -15,6 +15,14 @@ public abstract class FileSystemDBManager {
 
     private static final String TAG = "FileSystemDBManager (: ";
 
+    /**
+     * Get ContentValues for FilesTable
+     *
+     * @param path Path for COLUMN_PATH
+     * @param dir Integer value for COLUMN_IS_DIRECTORY
+     *            0(false) if file is not a directory, otherwise 1(true)
+     * @return ContentValues for adding to FilesTable
+     */
     private static ContentValues toValues(String path, Integer dir) {
         ContentValues values = new ContentValues();
         values.put(FilesTable.COLUMN_PATH, path);
@@ -22,6 +30,13 @@ public abstract class FileSystemDBManager {
         return values;
     }
 
+    /**
+     * Get ContentValues for ListTable
+     *
+     * @param file File ID for COLUMN_FILE_ID
+     * @param kid Kid file ID for COLUMN_KID_FILE_ID
+     * @return ContentValues for adding to ListTable
+     */
     private static ContentValues toValues(Long file, Long kid) {
         ContentValues values = new ContentValues();
         values.put(ListTable.COLUMN_FILE_ID, file);
@@ -29,10 +44,26 @@ public abstract class FileSystemDBManager {
         return values;
     }
 
+    /**
+     * Insert data to DB FilesTable
+     *
+     * @param db DB for insert to FilesTable
+     * @param path File path for insert to COLUMN_PATH
+     * @param dir Integer value for COLUMN_IS_DIRECTORY
+     *            0(false) if file is not a directory, otherwise 1(true)
+     * @return ID this new row in DB
+     */
     public static Long insert(SQLiteDatabase db, String path, Integer dir) {
         return db.insert(FilesTable.TABLE_NAME, null, toValues(path, dir));
     }
 
+    /**
+     * Insert data to DB ListTable
+     * @param db DB for insert to FilesTable
+     * @param file File ID for insert to COLUMN_FILE_ID
+     * @param kid Kid file ID for insert to COLUMN_KID_FILE_ID
+     * @return ID this new row in DB
+     */
     public static Long insert(SQLiteDatabase db, Long file, Long kid) {
         return db.insert(ListTable.TABLE_NAME, null, toValues(file, kid));
     }

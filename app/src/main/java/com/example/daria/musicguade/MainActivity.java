@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity
     public final static String FRAGMENT_INSTANCE_NAME = "fragment";
     public final static String PATH = "path";
 
-    public static String mainPath = "/mnt/sdcard";
+    public String mainPath = "/mnt/sdcard";
 
     public ProgressBar mProgressBar;
     public TextView address;
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mDBHelper = new FileSystemDBHelper(getApplicationContext());
+            mDBHelper = new FileSystemDBHelper(getApplicationContext(),mainPath);
             address.setText(R.string.text_looking);
             mProgressBar.setVisibility(View.VISIBLE);
         }
